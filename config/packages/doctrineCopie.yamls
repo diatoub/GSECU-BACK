@@ -1,0 +1,35 @@
+doctrine:
+    dbal:
+        default_connection: senegal #Ajouté
+        #url: '%env(resolve:DATABASE_URL)%'
+        connections: #Ajouté
+            senegal:
+                url: '%env(resolve:DATABASE_SENEGAL_URL)%'
+                #driver: 'pdo_mysql'
+                #server_version: '5.7'
+                #charset: utf8mb4
+            mali:
+                url: '%env(resolve:DATABASE_MALI_URL)%'
+                #driver: 'pdo_mysql'
+                #server_version: '5.7'
+                #charset: utf8mb4
+
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '13'
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
+            tree:
+                type: annotation # or attribute
+                alias: Gedmo
+                prefix: Gedmo\Tree\Entity
+                dir: "%kernel.project_dir%/vendor/gedmo/doctrine-extensions/src/Tree/Entity"
