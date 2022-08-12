@@ -51,7 +51,7 @@ pipeline {
             steps {
                 sh 'docker ps -qa -f name=${NAME} | xargs --no-run-if-empty docker rm -f'
                 sh 'docker images -f reference=${IMAGE} -qa | xargs --no-run-if-empty docker rmi'
-                sh 'docker run --name=${NAME} -d --restart=always -e DATABASE_URL=$DATABASE_URL -e MAILER_URL=$MAILER_URL -e APP_ENV=dev -e APP_DEBUG=0 -e APP_SECRET=$APP_SECRET --memory-reservation=256M --memory=512M -p 8011:80 -p 2211:22 ${IMAGE}:${VERSION}'
+                sh 'docker run --name=${NAME} -d --restart=always -e DATABASE_URL=$DATABASE_URL -e MAILER_URL=$MAILER_URL -e APP_ENV=dev -e APP_DEBUG=0 -e APP_SECRET=$APP_SECRET --memory-reservation=256M --memory=512M -p 8081:80 -p 2281:22  ${IMAGE}:${VERSION}'
             }
         }
     }
