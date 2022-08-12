@@ -10,8 +10,8 @@ pipeline {
         NAME = readMavenPom().getArtifactId()
         APP_SECRET = '80c92ec886604ceafe60372b33c32d29'
         MAILER_URL="smtp://10.100.56.56:25"
-        DATABASE_URL="mysql://qredic:qrdc_pma%40s2m@172.17.0.1:3306/qredic?serverVersion=13&charset=utf8"
-        PROJECT_REC="dstqredic-rec"
+        DATABASE_URL="mysql://gsecu:gsc_pma%40s2m@172.17.0.1:3306/gsecu_v2?serverVersion=13&charset=utf8"
+        PROJECT_REC="dstgsecubackend-rec"
         DC="backend"
     }
     
@@ -51,7 +51,7 @@ pipeline {
             steps {
                 sh 'docker ps -qa -f name=${NAME} | xargs --no-run-if-empty docker rm -f'
                 sh 'docker images -f reference=${IMAGE} -qa | xargs --no-run-if-empty docker rmi'
-                sh 'docker run --name=${NAME} -d --restart=always -e DATABASE_URL=$DATABASE_URL -e MAILER_URL=$MAILER_URL -e APP_ENV=dev -e APP_DEBUG=0 -e APP_SECRET=$APP_SECRET --memory-reservation=256M --memory=512M -p 8040:80 -p 2240:22 ${IMAGE}:${VERSION}'
+                sh 'docker run --name=${NAME} -d --restart=always -e DATABASE_URL=$DATABASE_URL -e MAILER_URL=$MAILER_URL -e APP_ENV=dev -e APP_DEBUG=0 -e APP_SECRET=$APP_SECRET --memory-reservation=256M --memory=512M -p 8011:80 -p 2211:22 ${IMAGE}:${VERSION}'
             }
         }
     }
