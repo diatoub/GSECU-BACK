@@ -63,9 +63,9 @@ class Dossier
     private $siteBeneficiaire;
 
     /**
-     * @var Utilisateur
+     * @var User
      *
-     * @ORM\ManyToOne(targetEntity="Utilisateur")
+     * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="validateur_id", referencedColumnName="id", onDelete="CASCADE")
      * })
@@ -230,17 +230,17 @@ class Dossier
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\ManyToMany(targetEntity="Utilisateur", inversedBy="dossier", cascade={"persist", "detach"})
-     * @ORM\JoinTable(name="dossier_has_utilisateur",
+     * @ORM\ManyToMany(targetEntity="User", inversedBy="dossier", cascade={"persist", "detach"})
+     * @ORM\JoinTable(name="dossier_has_user",
      *   joinColumns={
      *     @ORM\JoinColumn(name="dossier_id", referencedColumnName="id", onDelete="CASCADE")
      *   },
      *   inverseJoinColumns={
-     *     @ORM\JoinColumn(name="utilisateur_id", referencedColumnName="id")
+     *     @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      *   }
      * )
      */
-    private $utilisateur;
+    private $user;
 
 
     /**
@@ -427,7 +427,7 @@ class Dossier
     public function __construct()
     {
         //$this->historiqueDossier = new ArrayCollection();
-        $this->utilisateur = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->user = new \Doctrine\Common\Collections\ArrayCollection();
         $this->dateAjout = new \DateTime();
         $this->complementDossier = new \Doctrine\Common\Collections\ArrayCollection();
         $this->commentaire = new \Doctrine\Common\Collections\ArrayCollection();
@@ -725,46 +725,46 @@ class Dossier
     /**
      * @return Collection
      */
-    public function getUtilisateur(): Collection
+    public function getUser(): Collection
     {
-        return $this->utilisateur;
+        return $this->user;
     }
 
     /**
-     * Add utilisateur
+     * Add user
      *
-     * @param Utilisateur $utilisateur
+     * @param User $user
      * @return Dossier
      */
-    public function addUtilisateur(Utilisateur $utilisateur)
+    public function addUser(User $user)
     {
-        $this->utilisateur[] = $utilisateur;
+        $this->user[] = $user;
 
         return $this;
     }
 
     /**
-     * @param Utilisateur $utilisateur
+     * @param User $user
      */
-    public function setUtilisateur(Utilisateur $utilisateur): void
+    public function setUser(User $user): void
     {
-        //$this->utilisateur = $utilisateur;
-        if ($this->utilisateur->contains($utilisateur)) {
+        //$this->user = $user;
+        if ($this->user->contains($user)) {
             return;
         }
-        $this->utilisateur[] = $utilisateur;
+        $this->user[] = $user;
 
         //return $this;
     }
 
     /**
-     * Remove utilisateur
+     * Remove user
      *
-     * @param Utilisateur $utilisateur
+     * @param User $user
      */
-    public function removeUtilisateur(Utilisateur $utilisateur)
+    public function removeUser(User $user)
     {
-        $this->utilisateur->removeElement($utilisateur);
+        $this->user->removeElement($user);
     }
 
     /**
@@ -1180,17 +1180,17 @@ class Dossier
     }
 
     /**
-     * @return Utilisateur
+     * @return User
      */
-    public function getValidateur(): ?Utilisateur
+    public function getValidateur(): ?User
     {
         return $this->validateur;
     }
 
     /**
-     * @param Utilisateur $validateur
+     * @param User $validateur
      */
-    public function setValidateur(Utilisateur $validateur): void
+    public function setValidateur(User $validateur): void
     {
         $this->validateur = $validateur;
     }

@@ -66,7 +66,7 @@ class AuthenticationFailureListener
         $interval=$requestedPassword?($now->diff($requestedPassword))->format('%a'):0;
         $now=strtotime(date("Y-m-d H:i:s"));
         if(!$user){
-            $result =array("code"=>503,"status"=>false,"message"=>"Nom d'utilisateur invalide");
+            $result =array("code"=>503,"status"=>false,"message"=>"Nom d'user invalide");
             $event->setResponse(new JsonResponse($result));
         }
         else{
@@ -108,7 +108,7 @@ class AuthenticationFailureListener
         $user = $repo-> findOneBy(['username' => $username]);
         if(!$user){
             return [
-                'code' => 'ko',
+                'code' => '503',
                 'status'=>false,
                 'message' => 'Username incorrect'
             ];
@@ -125,7 +125,7 @@ class AuthenticationFailureListener
                     'username' 		=> $user->getUsername(),
                     'email'  		=> $user->getEmail(),
                     'role'    		=> $user->getRoles(),
-                    'nomComplet'    => $user->getNomComplet(),
+                    // 'nomComplet'    => $user->getNomComplet(),
                     'telephone'  	=> $user->getTelephone(),
                     'profil'		=>( $user->getProfil())?$user->getProfil()->getLibelle():null,
             );
@@ -140,67 +140,109 @@ class AuthenticationFailureListener
     }
 
     public function loginLdap($post,$user,$login){
-        $societeId=$user?$user->getStructure()? $user->getStructure()->getSociete()? $user->getStructure()->getSociete()->getId():null:null:null;
-
-        if ($societeId){
-            $port_ldap =$this->em->getRepository(Parametre::class)->getParam(Config::PORT_LDAP,$societeId) ;
-            $host_ldap = $this->em->getRepository(Parametre::class)->getParam(Config::HOST_LDAP,$societeId) ;
-            $query_ldap = $this->em->getRepository(Parametre::class)->getParam(Config::QUERY_LDAP,$societeId) ;
-            $dn_ldap = $this->em->getRepository(Parametre::class)->getParam(Config::DN_LDAP,$societeId) ;
-            $mail_ldap = $this->em->getRepository(Parametre::class)->getParam(Config::MAIL_LDAP,$societeId) ;
-            if ($port_ldap && $host_ldap && $query_ldap &&$dn_ldap){
-                try {
-                $ldap = Ldap::create('ext_ldap', ['host' => $host_ldap->getValeur(), 'port' => $port_ldap->getValeur(), 'encryption' => 'none', 'version' => 3, 'referrals' => false]);
-
-                    $ldap->bind(sprintf('%s'.$mail_ldap->getValeur(), $post['username']), $post['password']);
-                    $query = $ldap->query($dn_ldap->getValeur(), '(&('.$query_ldap->getValeur().'='.$post['username'].'))');
-                    $result = $query->execute()->toArray();
-                    $value=null;
-                    foreach($result as $entry) {
-                        if($entry->getAttributes()) {
-                            $value = $entry->getAttributes();
-                            break;
-                        }
-                    }
-                    if(!$user){
-                        $result= array('status' => "false",'code'=>502,'message'=>'utilisateur inexistant');
-                    }
-                    else{
-                        $token = $this->JWTEncoder->encode([
-                            'username' => $value['sAMAccountName'][0],
-                            'roles'=>$user->getRoles(),
-                            'exp' => time() + 3600 // 1 hour expiration
-                        ]);
-                         $result = array('token' => $token,'status' => true, 'data' => array(
-                            'prenom' => $value['givenName'][0], 'nom' => isset($value['sn'])?$value['sn'][0]:'', 'email' => $value['mail'][0], 'username' => $value['sAMAccountName'][0],
+        $ldap = Ldap::create('ext_ldap', ['host' => '10.100.55.80', 'port' => '389', 'encryption' => 'none', 'version' => 3, 'referrals' => false]);
+        try {
+            $ldap->bind(sprintf('%s@orange-sonatel.com', $post['username']), $post['password']);
+            $query = $ldap->query('dc=orange-sonatel,dc=com', '(&(samaccountname='.$post['username'].'))');
+            $result = $query->execute()->toArray();
+            $value=null;
+            foreach($result as $entry) {
+                if($entry->getAttributes()) {
+                    $value = $entry->getAttributes();
+                    break;
+                }
+            }
+            if(!$user){
+                $result= array('status' => "false",'code'=>502,'message'=>'utilisateur inexistant');
+            }
+            else{
+                $token = $this->JWTEncoder->encode([
+                    'username' => $value['sAMAccountName'][0],
+                    'roles'=>$user->getRoles(),
+                    'exp' => time() + 3600 // 1 hour expiration
+                ]);
+                $result = array('token' => $token,'status' => true, 'data' => array(
+                            'prenom' => $value['givenName'][0], 'nom' => $value['sn'][0], 'email' => $value['mail'][0], 'username' => $value['sAMAccountName'][0],
                             'matricule' => isset($value['initials'][0]) ? $value['initials'][0] : null,
                             'telephone' => isset($value['telephoneNumber'][0]) ? $value['telephoneNumber'][0] : null,
                             'roles'=>$user->getRoles(),
-                            'profil'		=>($user->getProfil())?$user->getProfil()->getLibelle():null,
+                            'isConnected'   =>$user->getPasswordRequestedAt()?true:false,
+                            'profil'		=>($user->getProfil())?$user->getProfil()->getCode():null,
 
-                        ));
-                    }
-
-                } catch(LdapException $e) {
-                    //   var_dump($e->getMessage());
-                    $login++;
-                    //  $user->setLoginTentative($login);
-                    $this->em->persist($user);
-                    $result = array('status' => "false",'code'=>502,'message'=>'login ou mot de passe incorrect');
-                }
-            }else{
-                $result = array('status' => "false",'code'=>502,'message'=>"Impossible de s'authentifier avec cet utilisateur");
+                ));
             }
-
-        }else{
-            $result = array('status' => "false",'code'=>502,'message'=>"Impossible de s'authentifier avec cet utilisateur");
+        } catch(ConnectionException $e) {
+            var_dump($e->getMessage());
+            $login++;
+            // $user->setLoginTentative($login);
+            $this->em->persist($user);
+            $result = array('status' => "false",'code'=>502,'message'=>'login ou mot de pass incorrect');
         }
-        
-        $verifPass = $this->passwordEncoder->isPasswordValid($user, $post['password']);
-        if (!$verifPass){
-            $result = array("code"=>503,"status"=>false,"message"=>"Mot de passe incorrecte");
-        }
-
         return $result;
     }
+
+    // public function loginLdap($post,$user,$login){
+    //     $societeId=$user?$user->getStructure()? $user->getStructure()->getSociete()? $user->getStructure()->getSociete()->getId():null:null:null;
+
+    //     if ($societeId){
+    //         $port_ldap =$this->em->getRepository(Parametre::class)->getParam(Config::PORT_LDAP,$societeId) ;
+    //         $host_ldap = $this->em->getRepository(Parametre::class)->getParam(Config::HOST_LDAP,$societeId) ;
+    //         $query_ldap = $this->em->getRepository(Parametre::class)->getParam(Config::QUERY_LDAP,$societeId) ;
+    //         $dn_ldap = $this->em->getRepository(Parametre::class)->getParam(Config::DN_LDAP,$societeId) ;
+    //         $mail_ldap = $this->em->getRepository(Parametre::class)->getParam(Config::MAIL_LDAP,$societeId) ;
+    //         if ($port_ldap && $host_ldap && $query_ldap &&$dn_ldap){
+    //             try {
+    //             $ldap = Ldap::create('ext_ldap', ['host' => $host_ldap->getValeur(), 'port' => $port_ldap->getValeur(), 'encryption' => 'none', 'version' => 3, 'referrals' => false]);
+
+    //                 $ldap->bind(sprintf('%s'.$mail_ldap->getValeur(), $post['username']), $post['password']);
+    //                 $query = $ldap->query($dn_ldap->getValeur(), '(&('.$query_ldap->getValeur().'='.$post['username'].'))');
+    //                 $result = $query->execute()->toArray();
+    //                 $value=null;
+    //                 foreach($result as $entry) {
+    //                     if($entry->getAttributes()) {
+    //                         $value = $entry->getAttributes();
+    //                         break;
+    //                     }
+    //                 }
+    //                 if(!$user){
+    //                     $result= array('status' => "false",'code'=>502,'message'=>'user inexistant');
+    //                 }
+    //                 else{
+    //                     $token = $this->JWTEncoder->encode([
+    //                         'username' => $value['sAMAccountName'][0],
+    //                         'roles'=>$user->getRoles(),
+    //                         'exp' => time() + 3600 // 1 hour expiration
+    //                     ]);
+    //                      $result = array('token' => $token,'status' => true, 'data' => array(
+    //                         'prenom' => $value['givenName'][0], 'nom' => isset($value['sn'])?$value['sn'][0]:'', 'email' => $value['mail'][0], 'username' => $value['sAMAccountName'][0],
+    //                         'matricule' => isset($value['initials'][0]) ? $value['initials'][0] : null,
+    //                         'telephone' => isset($value['telephoneNumber'][0]) ? $value['telephoneNumber'][0] : null,
+    //                         'roles'=>$user->getRoles(),
+    //                         'profil'		=>($user->getProfil())?$user->getProfil()->getLibelle():null,
+
+    //                     ));
+    //                 }
+
+    //             } catch(LdapException $e) {
+    //                 //   var_dump($e->getMessage());
+    //                 $login++;
+    //                 //  $user->setLoginTentative($login);
+    //                 $this->em->persist($user);
+    //                 $result = array('status' => "false",'code'=>502,'message'=>'login ou mot de passe incorrect');
+    //             }
+    //         }else{
+    //             $result = array('status' => "false",'code'=>502,'message'=>"Impossible de s'authentifier avec cet user");
+    //         }
+
+    //     }else{
+    //         $result = array('status' => "false",'code'=>502,'message'=>"Impossible de s'authentifier avec cet user");
+    //     }
+        
+    //     $verifPass = $this->passwordEncoder->isPasswordValid($user, $post['password']);
+    //     if (!$verifPass){
+    //         $result = array("code"=>503,"status"=>false,"message"=>"Mot de passe incorrecte");
+    //     }
+
+    //     return $result;
+    // }
 }

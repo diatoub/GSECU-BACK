@@ -181,7 +181,7 @@ class DossierRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('q')
             ->select('q.id as id, q.codeSecret as codeSecret, t.libelle as libelle_type, s.libelle as site, q.libelle as libelle, q.dateAjout as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison')
-            ->innerJoin('q.utilisateur', 'u')
+            ->innerJoin('q.user', 'u')
             ->join('q.typeDossier', 't')
             ->join('q.site', 's')
             ->join('q.etat', 'e')
@@ -199,7 +199,7 @@ class DossierRepository extends ServiceEntityRepository
     public function getDossierUserByProfil($id, $code)
     {
         $query = $this->createQueryBuilder('q')
-            ->innerJoin('q.utilisateur', 'u')
+            ->innerJoin('q.user', 'u')
             ->leftJoin('u.profil', 'p')
             ->where('q.id = :id')
             ->andWhere('p.code = :code')
@@ -226,7 +226,7 @@ class DossierRepository extends ServiceEntityRepository
     public function getAllDossierEtatByUser($user_id, $categorie, $etat)
     {
         $query = $this->createQueryBuilder('q')
-            ->innerJoin('q.utilisateur', 'u')
+            ->innerJoin('q.user', 'u')
             ->join('q.etat', 'e')
             ->join('q.typeDossier', 't')
             ->join('t.categorieDossier', 'c')
@@ -313,7 +313,7 @@ class DossierRepository extends ServiceEntityRepository
 
         $query = $this->createQueryBuilder('q')
             ->select('t.id as type_id, t.libelle as type_libelle, MONTHNAME(q.dateAjout) as mois,  YEAR(q.dateAjout) as annee, count(q.id) as nombre')
-            ->innerJoin('q.utilisateur', 'u')
+            ->innerJoin('q.user', 'u')
             ->leftJoin('q.typeDossier', 't')
             ->leftJoin('t.categorieDossier', 'c')
             ->where('c.code = :code')
@@ -350,7 +350,7 @@ class DossierRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('q')
             ->select('t.id as type_id, t.libelle as type_libelle, count(q.id) as nombre')
-            ->innerJoin('q.utilisateur', 'u')
+            ->innerJoin('q.user', 'u')
             ->leftJoin('q.typeDossier', 't')
             ->leftJoin('t.categorieDossier', 'c')
             ->where('c.code =:code')
@@ -401,7 +401,7 @@ class DossierRepository extends ServiceEntityRepository
 
         $query = $this->createQueryBuilder('q')
             ->select('c.id as categorie_id, c.libelle as categorie_libelle, MONTHNAME(q.dateAjout) as mois,  YEAR(q.dateAjout) as annee, count(q.id) as nombre')
-            ->innerJoin('q.utilisateur', 'u')
+            ->innerJoin('q.user', 'u')
             ->leftJoin('q.typeDossier', 't')
             ->leftJoin('t.categorieDossier', 'c')
             ->where('u.id =:user_id')
@@ -434,7 +434,7 @@ class DossierRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('q')
             ->select('c.id as categorie_id, c.libelle as categorie_libelle, count(q.id) as nombre')
-            ->innerJoin('q.utilisateur', 'u')
+            ->innerJoin('q.user', 'u')
             ->leftJoin('q.typeDossier', 't')
             ->leftJoin('t.categorieDossier', 'c')
             ->where('u.id =:id')
@@ -474,7 +474,7 @@ class DossierRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('q')
             ->select('q.id, q.libelle, q.dateAjout, u.nom as user_nom, u.prenom as user_prenom, u.email as user_email')
-            ->innerJoin('q.utilisateur', 'u')
+            ->innerJoin('q.user', 'u')
             ->leftJoin('u.profil', 'p')
             ->leftJoin('q.etat', 'e')
             ->where('e.libelle =:libelle')

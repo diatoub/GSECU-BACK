@@ -69,14 +69,13 @@ class AuthenticationSuccessListener
 					'username' 		=> $user->getUsername(),
 					'email'  		=> $user->getEmail(),
 					'role'    		=> $user->getRoles(),
-                    'nomComplet'    => $user->getNomComplet(),
-                //	'prenom'  	    => $user->getPrenom(),
+                    'nom'    => $user->getNom(),
+                	'prenom'  	    => $user->getPrenom(),
 					'telephone'  	=> $user->getTelephone(),
                 //  'isManager'     => $user->getIsManager(),
                     'profil'		=>( $user->getProfil())?$user->getProfil()->getLibelle():null,
                   //  'photo'         =>$user->getAvatar()?'/uploads/images/'.$user->getAvatar():null,
-                    'isConnected'   =>$user->getPasswordRequestedAt()?true:false,
-					'filiale'		=> $user->getFournisseur() && $user->getFournisseur()->getIdUser() && $user->getFournisseur()->getIdUser()->getStructure() && $user->getFournisseur()->getIdUser()->getStructure()->getSociete() ? $user->getFournisseur()->getIdUser()->getStructure()->getSociete()->getCode() : null
+                    'isConnected'   =>$user->getPasswordRequestedAt()?true:false
 			);
 
 		}

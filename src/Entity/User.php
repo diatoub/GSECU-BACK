@@ -6,9 +6,9 @@ use Doctrine\ORM\Mapping as ORM;
 use FOS\UserBundle\Model\User as BaseUser;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\UtilisateurRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  */
-class Utilisateur extends BaseUser
+class User extends BaseUser
 {
     /**
      * @ORM\Id()
@@ -55,7 +55,7 @@ class Utilisateur extends BaseUser
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\ManyToMany(targetEntity="Dossier", mappedBy="utilisateur")
+     * @ORM\ManyToMany(targetEntity="Dossier", mappedBy="User")
      */
     protected $dossier;
 
@@ -119,7 +119,7 @@ class Utilisateur extends BaseUser
      * Set profil
      *
      * @param Profil $profil
-     * @return Utilisateur
+     * @return User
      */
     public function setProfil(Profil $profil = null)
     {
@@ -142,7 +142,7 @@ class Utilisateur extends BaseUser
      * Set structure
      *
      * @param Structure $structure
-     * @return Utilisateur
+     * @return User
      */
     public function setStructure(Structure $structure = null)
     {
@@ -165,7 +165,7 @@ class Utilisateur extends BaseUser
      * Add dossier
      *
      * @param Dossier $dossier
-     * @return Utilisateur
+     * @return User
      */
     public function addDossier(Dossier $dossier)
     {
