@@ -46,7 +46,7 @@ pipeline {
 
         stage(' Deploy IN Dev') {
             when {
-                anyOf { branch 'develop' }
+                anyOf { branch 'master' }
             }
             steps {
                 sh 'docker ps -qa -f name=${NAME} | xargs --no-run-if-empty docker rm -f'
