@@ -2,11 +2,9 @@
 namespace App\Listener;
 
 use App\Entity\User;
-use App\Entity\Useragence;
 use DateTime;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
-use App\Entity\DetailsGrille;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
