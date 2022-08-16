@@ -5,7 +5,7 @@ pipeline {
     }
     environment {
         EMAIL_RECIPIENTS = 'MoctarThiam.MBODJ@orange-sonatel.com, Madiagne.Sylla@orange-sonatel.com, Mohamed.SALL@orange-sonatel.com, MelchisedeckFolloh.MABIALA@orange-sonatel.com'
-        IMAGE = 'registry.tools.orange-sonatel.com/dd/qredic-backend'
+        IMAGE = 'registry.tools.orange-sonatel.com/dd/gsecu-backend'
         VERSION = readMavenPom().getVersion()
         NAME = readMavenPom().getArtifactId()
         APP_SECRET = '80c92ec886604ceafe60372b33c32d29'
