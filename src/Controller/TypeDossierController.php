@@ -23,8 +23,8 @@ class TypeDossierController extends BaseController {
      * @QMLogger(message="listes types dossiers")
      */
     public function listeTypeDossier(Request $request) {
-        $post=json_decode($request->getContent(),true);
-        return $this->typeDossierManager->lesTypesDossiers($this->getUser(),$post);
+        $id=$request->query->get('id');
+        return $this->typeDossierManager->lesTypesDossiers($this->getUser(),$id);
     }
     
 }

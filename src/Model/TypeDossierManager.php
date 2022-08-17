@@ -14,8 +14,8 @@ class TypeDossierManager extends BaseManager {
         $this->em = $doctrine->getManager();
     }
 
-    public function lesTypesDossiers($userConnect, $post){
-        $catgorieDossier = isset($post['id']) ? $this->em->getRepository(CategorieDossier::class)->find($post['id']) : null ;
+    public function lesTypesDossiers($userConnect, $id){
+        $catgorieDossier = $id ? $this->em->getRepository(CategorieDossier::class)->find($id) : null ;
         $catgorie = $catgorieDossier ? $catgorieDossier->getCode() :null ;
         $les_equipements = $this->em->getRepository(TypeDossier::class)->lesTypesDossiers($catgorie);
         return $this->sendResponse(true, 200, $les_equipements);
