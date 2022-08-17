@@ -146,7 +146,7 @@ class AuthenticationFailureListener
                     'roles'=>$user->getRoles(),
                     'exp' => time() + 3600 // 1 hour expiration
                 ]);
-                $result = array('token' => $token,'status' => true, 'data' => array(
+                $result = array('token' => $token,'code' => 200,'status' => true, 'data' => array(
                             'prenom' => $value['givenName'][0], 'nom' => $value['sn'][0], 'email' => $value['mail'][0], 'username' => $value['sAMAccountName'][0],
                             'matricule' => isset($value['initials'][0]) ? $value['initials'][0] : null,
                             'telephone' => isset($value['telephoneNumber'][0]) ? $value['telephoneNumber'][0] : null,
