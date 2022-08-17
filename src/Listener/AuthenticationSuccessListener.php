@@ -62,6 +62,7 @@ class AuthenticationSuccessListener
 				return;
 			}
             $data['success'] = true;
+            $data['code'] = 200;
 			$data['data'] = array(
 					'id'			=> $user->getId(),
 					'username' 		=> $user->getUsername(),
