@@ -63,6 +63,11 @@ class TypeDossier
     private $typeMateriel;
 
     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $code;
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -169,5 +174,17 @@ class TypeDossier
     public function __toString()
     {
         return $this->libelle;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): self
+    {
+        $this->code = $code;
+
+        return $this;
     }
 }
