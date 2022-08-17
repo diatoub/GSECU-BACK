@@ -3,7 +3,6 @@ namespace App\Controller;
 
 use Doctrine\Persistence\ManagerRegistry;
 Use App\Annotation\QMLogger;
-use App\Entity\TypeDossier;
 use App\Model\TypeDossierManager;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Request;

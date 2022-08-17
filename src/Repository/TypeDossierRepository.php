@@ -28,7 +28,18 @@ class TypeDossierRepository extends ServiceEntityRepository
             ->setParameter('id', 8)
             ->getQuery()
             ->getResult();
-        return $query;
+            return $query;
+    }
+
+    public function lesTypesDossiers($categorie){
+        $queryBuilder = $this->createQueryBuilder('td')
+        ->select('td.id, td.libelle, td.nbreJoursLivraison, cd.libelle, cd.code')
+        ->innerJoin('td.categorieDossier', 'cd');
+            if ($categorie!=null){
+                $queryBuilder->andWhere('cd.code = :categorie')->setParameter('categorie',$categorie);
+            }
+        return $queryBuilder->getQuery()
+            ->getResult();
     }
 
     // /**
