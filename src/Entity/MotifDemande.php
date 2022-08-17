@@ -31,6 +31,11 @@ class MotifDemande
      */
     private $docsACharger;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $etat;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -67,5 +72,17 @@ class MotifDemande
     public function setDocsACharger($docsACharger): void
     {
         $this->docsACharger = $docsACharger;
+    }
+
+    public function getEtat(): ?bool
+    {
+        return $this->etat;
+    }
+
+    public function setEtat(bool $etat): self
+    {
+        $this->etat = $etat;
+
+        return $this;
     }
 }

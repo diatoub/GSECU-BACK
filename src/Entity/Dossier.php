@@ -86,10 +86,6 @@ class Dossier
      * @var string
      *
      * @ORM\Column(name="email", type="string", length=255)
-     * @Assert\NotNull(message="Vous devez préciser votre adresse email !")
-     * @Assert\Email(
-     *     message = "'{{ value }}' n'est pas un email valide.",
-     * )
      */
     private $email;
 
@@ -150,19 +146,9 @@ class Dossier
      *
      * @ORM\ManyToOne(targetEntity="Site")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="site", referencedColumnName="id", onDelete="CASCADE")
+     *   @ORM\JoinColumn(name="site",  nullable=true, referencedColumnName="id", onDelete="CASCADE")
      * })
-     * @Assert\NotNull(message="Vous devez choisir le site!")
-     */
-
-    /**
-     * @var Site
-     *
-     * @ORM\ManyToOne(targetEntity="Site")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="site", referencedColumnName="id", onDelete="CASCADE")
-     * })
-     * @Assert\NotNull(message="Vous devez choisir le site!")
+     
      */
     private $site;
 
@@ -295,7 +281,7 @@ class Dossier
      *
      * @ORM\ManyToOne(targetEntity="TypeBadge")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="type_badge_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="type_badge_id", referencedColumnName="id", onDelete="CASCADE")
      * })
      */
     private $typeBadge;
@@ -305,7 +291,7 @@ class Dossier
      *
      * @ORM\ManyToOne(targetEntity="MotifDemande")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="motif_demande_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="motif_demande_id", referencedColumnName="id", onDelete="CASCADE")
      * })
      */
     private $motifDemande;
@@ -335,12 +321,12 @@ class Dossier
      *
      * @ORM\ManyToMany(targetEntity="Equipement", inversedBy="dossier", cascade={"persist", "merge","detach"})
      * @ORM\JoinTable(name="dossier_has_epi",
-     *   joinColumns={
-     *     @ORM\JoinColumn(name="dossier_id", referencedColumnName="id", onDelete="CASCADE")
-     *   },
-     *   inverseJoinColumns={
-     *     @ORM\JoinColumn(name="equipement_id", referencedColumnName="id")
-     *   }
+     * joinColumns={
+     * @ORM\JoinColumn(name="dossier_id", referencedColumnName="id", onDelete="CASCADE")
+     * },
+     * inverseJoinColumns={
+     * @ORM\JoinColumn(name="equipement_id", referencedColumnName="id")
+     * }
      * )
      */
     private $epi;
@@ -350,7 +336,7 @@ class Dossier
      *
      * @ORM\ManyToOne(targetEntity="TypeContrat")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="type_contrat_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="type_contrat_id", referencedColumnName="id", onDelete="CASCADE")
      * })
      */
     private $typeContrat;
@@ -363,19 +349,14 @@ class Dossier
     private $beneficiaire;
 
     /**
-     * @var \Doctrine\Common\Collections\Collection
+     * @var NiveauAcces
      *
-     * @ORM\ManyToMany(targetEntity="NiveauAcces", inversedBy="dossier", cascade={"persist", "detach"})
-     * @ORM\JoinTable(name="dossier_has_niveau",
-     *   joinColumns={
-     *     @ORM\JoinColumn(name="dossier_id", referencedColumnName="id", onDelete="CASCADE")
-     *   },
-     *   inverseJoinColumns={
-     *     @ORM\JoinColumn(name="niveau_acces_id", referencedColumnName="id")
-     *   }
-     * )
+     * @ORM\ManyToOne(targetEntity="NiveauAcces")
+     * @ORM\JoinColumns({
+     * @ORM\JoinColumn(name="niveau_Acces_id", referencedColumnName="id", onDelete="CASCADE")
+     *  })
      */
-    private $niveauAcces; //@Assert\Count(min = 1, minMessage = "Au moins un niveau d'accès doit être coché")
+    private $niveauAcces; 
 
     /**
      * @var string
@@ -423,6 +404,31 @@ class Dossier
      */
     public $fileBeneficiaires;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class)
+     */
+    private $agentExecution;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=MotifRemplacement::class, inversedBy="dossiers")
+     */
+    private $motifRemplacement;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=ObjetBadge::class)
+     */
+    private $objetBadge;
+
+    /**
+     * @ORM\OneToMany(targetEntity=BeneficiaireQrcode::class, mappedBy="dossier")
+     */
+    private $beneficiaireQrcodes;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $choixAutorisation = true;
+
 
     public function __construct()
     {
@@ -431,8 +437,8 @@ class Dossier
         $this->dateAjout = new \DateTime();
         $this->complementDossier = new \Doctrine\Common\Collections\ArrayCollection();
         $this->commentaire = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->niveauAcces = new \Doctrine\Common\Collections\ArrayCollection();
         $this->sites = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->beneficiaireQrcodes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -1086,31 +1092,19 @@ class Dossier
         return $this;
     }
 
+   
     /**
-     * @return Collection
+     * @return NiveauAcces
      */
-    public function getNiveauAcces(): Collection
+    public function getNiveauAcces(): ? NiveauAcces
     {
         return $this->niveauAcces;
     }
 
     /**
-     * Add NiveauAcces
-     *
      * @param NiveauAcces $niveauAcces
-     * @return Dossier
      */
-    public function addNiveauAcces(NiveauAcces $niveauAcces)
-    {
-        $this->niveauAcces[] = $niveauAcces;
-
-        return $this;
-    }
-
-    /**
-     * @param Collection $niveauAcces
-     */
-    public function setNiveauAcces(Collection $niveauAcces): void
+    public function setNiveauAcces(NiveauAcces $niveauAcces): void
     {
         $this->niveauAcces = $niveauAcces;
     }
@@ -1315,6 +1309,84 @@ class Dossier
     public function setFileBeneficiaires(UploadedFile $fileBeneficiaires): void
     {
         $this->fileBeneficiaires = $fileBeneficiaires;
+    }
+
+    public function getAgentExecution(): ?User
+    {
+        return $this->agentExecution;
+    }
+
+    public function setAgentExecution(?User $agentExecution): self
+    {
+        $this->agentExecution = $agentExecution;
+
+        return $this;
+    }
+
+    public function getMotifRemplacement(): ?MotifRemplacement
+    {
+        return $this->motifRemplacement;
+    }
+
+    public function setMotifRemplacement(?MotifRemplacement $motifRemplacement): self
+    {
+        $this->motifRemplacement = $motifRemplacement;
+
+        return $this;
+    }
+
+    public function getObjetBadge(): ?ObjetBadge
+    {
+        return $this->objetBadge;
+    }
+
+    public function setObjetBadge(?ObjetBadge $objetBadge): self
+    {
+        $this->objetBadge = $objetBadge;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BeneficiaireQrcode>
+     */
+    public function getBeneficiaireQrcodes(): Collection
+    {
+        return $this->beneficiaireQrcodes;
+    }
+
+    public function addBeneficiaireQrcode(BeneficiaireQrcode $beneficiaireQrcode): self
+    {
+        if (!$this->beneficiaireQrcodes->contains($beneficiaireQrcode)) {
+            $this->beneficiaireQrcodes[] = $beneficiaireQrcode;
+            $beneficiaireQrcode->setDossier($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBeneficiaireQrcode(BeneficiaireQrcode $beneficiaireQrcode): self
+    {
+        if ($this->beneficiaireQrcodes->removeElement($beneficiaireQrcode)) {
+            // set the owning side to null (unless already changed)
+            if ($beneficiaireQrcode->getDossier() === $this) {
+                $beneficiaireQrcode->setDossier(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getChoixAutorisation(): ?bool
+    {
+        return $this->choixAutorisation;
+    }
+
+    public function setChoixAutorisation(bool $choixAutorisation): self
+    {
+        $this->choixAutorisation = $choixAutorisation;
+
+        return $this;
     }
 
 

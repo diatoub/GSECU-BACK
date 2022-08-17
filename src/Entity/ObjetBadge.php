@@ -2,33 +2,34 @@
 
 namespace App\Entity;
 
+use App\Repository\ObjetBadgeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Repository\NiveauAccesRepository")
+ * @ORM\Entity(repositoryClass=ObjetBadgeRepository::class)
  */
-class NiveauAcces
+class ObjetBadge
 {
     /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
+     * @ORM\Id
+     * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=60)
      */
     private $libelle;
-
-     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Dossier", mappedBy="niveauAcces", orphanRemoval=true)
-     */
-    private $dossier;
 
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function __toString()
+    {
+        return $this->libelle;
     }
 
     public function getLibelle(): ?string
@@ -41,10 +42,5 @@ class NiveauAcces
         $this->libelle = $libelle;
 
         return $this;
-    }
-
-    public function __toString()
-    {
-        return $this->libelle;
     }
 }

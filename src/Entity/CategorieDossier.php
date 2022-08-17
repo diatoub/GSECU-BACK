@@ -11,6 +11,7 @@ class CategorieDossier
 {
     const SIGNALISATION = 'SIGNALISATION';
     const DEMANDE 		= 'DEMANDE';
+    const QRCODE 		= 'QRCODE';
 
     /**
      * @ORM\Id()
