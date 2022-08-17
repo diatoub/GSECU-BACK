@@ -33,7 +33,7 @@ class TypeDossierRepository extends ServiceEntityRepository
 
     public function lesTypesDossiers($categorie){
         $queryBuilder = $this->createQueryBuilder('td')
-        ->select('td.id, td.libelle, td.nbreJoursLivraison, cd.libelle, cd.code')
+        ->select('td.id, td.libelle, td.nbreJoursLivraison, cd.code')
         ->innerJoin('td.categorieDossier', 'cd');
             if ($categorie!=null){
                 $queryBuilder->andWhere('cd.code = :categorie')->setParameter('categorie',$categorie);
