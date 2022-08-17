@@ -47,4 +47,14 @@ class MotifDemandeRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function lesMotifsDemandes($type){
+        $queryBuilder = $this->createQueryBuilder('md')
+            ->select('md.id, md.libelle, md.docsACharger, md.etat');
+            if ($type!='ALL'){
+                $queryBuilder->andWhere('md.etat = :etat')->setParameter('etat',(int)$type);
+            }
+        return $queryBuilder->getQuery()
+            ->getResult();
+    }
 }

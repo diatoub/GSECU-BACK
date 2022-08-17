@@ -73,4 +73,16 @@ class MotifRemplacementRepository extends ServiceEntityRepository
         ;
     }
     */
+    
+    public function lesMotifsRemplacements($type){
+        $queryBuilder = $this->createQueryBuilder('mr')
+            ->select('mr.id, mr.libelle, mr.docsACharger, mr.etat');
+            if ($type!='ALL'){
+                $queryBuilder->andWhere('mr.etat = :etat')->setParameter('etat',(int)$type);
+            }
+        return $queryBuilder->getQuery()
+            ->getResult();
+    }
+
 }
+

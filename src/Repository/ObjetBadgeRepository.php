@@ -75,4 +75,11 @@ class ObjetBadgeRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function lesObjetBadges(){
+        $queryBuilder = $this->createQueryBuilder('ob')
+            ->select('ob.id,ob.libelle');
+        return $queryBuilder->getQuery()
+            ->getResult();
+    }
 }

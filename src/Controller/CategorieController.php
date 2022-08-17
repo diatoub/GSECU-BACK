@@ -1,7 +1,6 @@
 <?php
 namespace App\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
 use Doctrine\Persistence\ManagerRegistry;
 Use App\Annotation\QMLogger;
 use App\Entity\CategorieDossier;
