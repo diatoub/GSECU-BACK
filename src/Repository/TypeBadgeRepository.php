@@ -47,4 +47,12 @@ class TypeBadgeRepository extends ServiceEntityRepository
         ;
     }
     */
+
+
+    public function listeTypeBadge(){
+        $queryBuilder = $this->createQueryBuilder('tb')
+            ->select('tb.id,tb.libelle');
+        return $queryBuilder->getQuery()
+            ->getResult();
+    }
 }

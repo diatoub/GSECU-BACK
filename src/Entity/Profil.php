@@ -9,12 +9,12 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Profil
 {
-    const ROLE_SIGNALEUR     		 = 'SIGNALEUR';
-    const ROLE_EXECUTEUR      		 = 'EXECUTEUR';
-    const ROLE_ADMINISTRATEUR		 = 'ADMIN';
-    const ROLE_SUPER_ADMINISTRATEUR  = 'SUPER_ADMINISTRATUER';
-    const ROLE_DEMANDEUR  			 = 'DEMANDEUR';
-    const ROLE_DGSECU 			     = 'DGSECU';
+    const SIGNALEUR     		 = 'SIGNALEUR';
+    const EXECUTEUR      		 = 'EXECUTEUR';
+    const ADMINISTRATEUR		 = 'ADMIN';
+    const SUPER_ADMINISTRATEUR   = 'SUPER_ADMIN';
+    const SUPER_AGENT  			 = 'SUPER_AGENT';
+    const DGSECU 			     = 'DGSECU';
 
 
     /**

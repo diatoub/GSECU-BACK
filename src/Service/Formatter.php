@@ -55,7 +55,7 @@ class Formatter implements FormatterInterface
         $DATE_ACTION=date("Y-m-d H:i:s");
         $TYPE_LOG="INFO";
         $CODE_SRC_LOG=$record['message'];
-        $SERVICENAME="QREDIC-API";
+        $SERVICENAME="GSECU-API";
         $IP_SRC_ACTION=$this->getUserIpAddr();
         $HOSTNAME_SRC_ACTION="732df7107b5f";
         $LOGIN=$login;

@@ -7,7 +7,6 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 
 class BaseController extends AbstractFOSRestController
 {
-
     public function sendResponse($suc, $cod, $data,$total=null) {
         $retour=array('success'=>$suc, 'code'=>$cod, 'data'=>$data);
         $total!=null?$retour['total']=$total:'';

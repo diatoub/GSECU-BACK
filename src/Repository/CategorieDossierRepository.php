@@ -47,4 +47,12 @@ class CategorieDossierRepository extends ServiceEntityRepository
         ;
     }
     */
+
+
+    public function lescategories(){
+        $queryBuilder = $this->createQueryBuilder('c')
+            ->select('c.id,c.libelle,c.code');
+        return $queryBuilder->getQuery()
+            ->getResult();
+    }
 }

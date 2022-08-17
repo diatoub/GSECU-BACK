@@ -47,4 +47,10 @@ class TypeContratRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function listeTypeContrat(){
+        $queryBuilder = $this->createQueryBuilder('tc')
+            ->select('tc.id,tc.libelle, tc.description');
+        return $queryBuilder->getQuery()->getResult();
+    }
 }

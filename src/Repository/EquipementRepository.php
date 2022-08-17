@@ -47,4 +47,32 @@ class EquipementRepository extends ServiceEntityRepository
         ;
     }
     */
+
+
+    public function listEquipements($limit,$offset,$filtre){
+        $queryBuilder = $this->createQueryBuilder('e')
+            ->select('e.id,e.libelle,e.description');
+        if($limit != 'ALL'){
+            $queryBuilder->setFirstResult($offset)->setMaxResults($limit);
+        }
+        if($filtre != ''){
+            $queryBuilder
+                ->andWhere('e.libelle LIKE :filtre')
+                ->setParameter('filtre','%'.$filtre.'%');
+        }
+        return $queryBuilder->getQuery()
+            ->getResult();
+    }
+
+    public function countEquipements($filtre){
+        $queryBuilder= $this->createQueryBuilder('e')
+            ->select('count(e.id)');
+        if($filtre != ''){
+            $queryBuilder
+                ->andWhere('e.libelle LIKE :filtre')
+                ->setParameter('filtre','%'.$filtre.'%');
+        }
+        return $queryBuilder->getQuery()
+            ->getSingleScalarResult();
+    }
 }
