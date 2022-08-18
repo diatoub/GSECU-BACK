@@ -47,4 +47,16 @@ class StructureRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function lesStructures($typeStructure, $type){
+        $queryBuilder = $this->createQueryBuilder('s')
+        ->select('s.id, s.libelle, s.rgt, s.lft, s.lvl, s.root, ts.libelle as type_structure, p.libelle as pere_libelle')
+        ->innerJoin('s.typeStructure', 'ts')
+        ->innerJoin('s.pere', 'p');
+            if ($typeStructure!=null){
+                $queryBuilder->andWhere('ts.libelle = :typeStructure')->setParameter('typeStructure',$typeStructure);
+            }
+        return $queryBuilder->getQuery()
+            ->getResult();
+    }
 }

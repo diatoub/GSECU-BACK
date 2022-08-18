@@ -47,4 +47,14 @@ class SiteRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function lesSites($type){
+        $queryBuilder = $this->createQueryBuilder('s')
+            ->select('s.id, s.libelle, s.enabled');
+            if ($type!='ALL'){
+                $queryBuilder->andWhere('s.enabled = :enabled')->setParameter('enabled',(int)$type);
+            }
+        return $queryBuilder->getQuery()
+            ->getResult();
+    }
 }
