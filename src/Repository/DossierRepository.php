@@ -48,6 +48,120 @@ class DossierRepository extends ServiceEntityRepository
     }
     */
 
+// Les nouveaux API mis en place par KOROBOTO
+    
+public function lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin, $offset,$limit,$filtre, $my_etat, $my_site)
+{
+    $query = $this->createQueryBuilder('d')
+        ->select('d.id, d.codeSecret as codeSecret, t.libelle as libelle_type, s.libelle as site, d.libelle as libelle, d.dateAjout as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison')
+        ->join('d.typeDossier', 't')
+        ->join('d.etat', 'e')
+        ->join('d.site', 's')
+        ->join('t.categorieDossier', 'c')
+        ->orderBy('d.id', 'DESC');
+
+        if($catgorieDossier)
+        {
+            $query->andWhere('c.code = :code')
+            ->setParameter('code', $catgorieDossier);
+        }
+        if($codeDossier)
+        {
+            $query->andWhere('d.codeDossier = :codeDossier')
+            ->setParameter('codeDossier', $codeDossier);
+        }
+
+        if($my_etat)
+        {
+            $query->andWhere('e.libelle = :etat')
+                ->setParameter('etat', $my_etat);
+        }
+
+        if($dateDebut && $dateFin)
+        {
+            $query->andWhere('d.dateAjout BETWEEN :dateDebut AND :dateFin')
+                ->setParameter('dateDebut', $dateDebut->format('Y-m-d'))
+                ->setParameter('dateFin', $dateFin->format('Y-m-d'));
+        }
+        if($limit != 'ALL'){
+            $query->setFirstResult($offset)->setMaxResults($limit);
+        }
+        if($filtre != ''){
+            $query
+                ->andWhere('d.libelle LIKE :filtre')
+                ->setParameter('filtre','%'.$filtre.'%');
+        }
+        if($filtre)
+        {
+            $query->andWhere('d.libelle LIKE :filtre')
+                ->setParameter('filtre', '%'.$filtre.'%');
+        }
+        if($my_site)
+        {
+            $query->andWhere('s.libelle = :site')
+                ->setParameter('site', $my_site);
+        }
+
+    return $query->getQuery()->getResult();
+}
+public function countDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin, $offset,$limit,$filtre, $my_etat, $my_site)
+{
+    $query = $this->createQueryBuilder('d')
+        ->select('count(d.id)')
+        ->join('d.typeDossier', 't')
+        ->join('d.etat', 'e')
+        ->join('d.site', 's')
+        ->join('t.categorieDossier', 'c')
+        ->orderBy('d.id', 'DESC');
+
+        if($catgorieDossier)
+        {
+            $query->andWhere('c.code = :code')
+            ->setParameter('code', $catgorieDossier);
+        }
+        if($codeDossier)
+        {
+            $query->andWhere('d.codeDossier = :codeDossier')
+            ->setParameter('codeDossier', $codeDossier);
+        }
+
+        if($my_etat)
+        {
+            $query->andWhere('e.libelle = :etat')
+                ->setParameter('etat', $my_etat);
+        }
+
+        if($dateDebut && $dateFin)
+        {
+            $query->andWhere('d.dateAjout BETWEEN :dateDebut AND :dateFin')
+                ->setParameter('dateDebut', $dateDebut->format('Y-m-d'))
+                ->setParameter('dateFin', $dateFin->format('Y-m-d'));
+        }
+        if($limit != 'ALL'){
+            $query->setFirstResult($offset)->setMaxResults($limit);
+        }
+        if($filtre != ''){
+            $query
+                ->andWhere('d.libelle LIKE :filtre')
+                ->setParameter('filtre','%'.$filtre.'%');
+        }
+        if($filtre)
+        {
+            $query->andWhere('d.libelle LIKE :filtre')
+                ->setParameter('filtre', '%'.$filtre.'%');
+        }
+        if($my_site)
+        {
+            $query->andWhere('s.libelle = :site')
+                ->setParameter('site', $my_site);
+        }
+
+        return $query->getQuery()->getSingleScalarResult();
+
+}
+
+
+ // Les anciens API
     public function getLastDossierId($limit = 1){
         return $this->createQueryBuilder('q')
             ->select('q.id as last_id')
@@ -111,56 +225,6 @@ class DossierRepository extends ServiceEntityRepository
                 ->setParameter('dateFin', $entity->getDateFin()->format('Y-m-d'));
         }
         $query->groupBy('s.id');
-
-        return $query->getQuery()->getResult();
-    }
-
-    public function getAllDossier($categorie, $entity)
-    {
-        $query = $this->createQueryBuilder('q')
-            ->select('q.id, q.codeSecret as codeSecret, t.libelle as libelle_type, s.libelle as site, q.libelle as libelle, q.dateAjout as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison')
-            ->join('q.typeDossier', 't')
-            ->join('q.etat', 'e')
-            ->join('q.site', 's')
-            ->join('t.categorieDossier', 'c')
-            ->where('c.code = :code')
-            ->setParameter( 'code', $categorie)
-            ->orderBy('q.id', 'DESC')
-            ;
-
-        if($entity->getLibelle())
-        {
-            $query->andWhere('q.libelle LIKE :libelle')
-                ->setParameter('libelle', '%'.$entity->getLibelle().'%');
-        }
-        if($entity->getCodeDossier())
-        {
-            $query->andWhere('q.codeDossier = :codeDossier')
-                ->setParameter('codeDossier', $entity->getCodeDossier());
-        }
-        if($entity->getSite())
-        {
-            $query->andWhere('q.site = :site_id')
-                ->setParameter('site_id', $entity->getSite()->getId());
-        }
-        if($entity->getTypeDossier())
-        {
-            $query->andWhere('q.typeDossier = :type_dossier_id')
-
-                ->setParameter('type_dossier_id', $entity->getTypeDossier()->getId());
-        }
-        if($entity->getEtat())
-        {
-            $query->andWhere('q.etat = :etat_id')
-                ->setParameter('etat_id', $entity->getEtat()->getId());
-        }
-
-        if($entity->getDateDebut() && $entity->getDateFin())
-        {
-            $query->andWhere('q.dateAjout BETWEEN :dateDebut AND :dateFin')
-                ->setParameter('dateDebut', $entity->getDateDebut()->format('Y-m-d'))
-                ->setParameter('dateFin', $entity->getDateFin()->format('Y-m-d'));
-        }
 
         return $query->getQuery()->getResult();
     }

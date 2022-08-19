@@ -47,4 +47,10 @@ class TypeMaterielRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function listeTypeStructure(){
+        $queryBuilder = $this->createQueryBuilder('ts')
+            ->select('ts.id,ts.libelle, ts.code');
+        return $queryBuilder->getQuery()->getResult();
+    }
 }
