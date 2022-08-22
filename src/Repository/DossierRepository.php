@@ -53,7 +53,7 @@ class DossierRepository extends ServiceEntityRepository
 public function lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin, $offset,$limit,$filtre, $my_etat, $my_site)
 {
     $query = $this->createQueryBuilder('d')
-        ->select('d.id, d.codeSecret as codeSecret, t.libelle as libelle_type, s.libelle as site, d.libelle as libelle, d.dateAjout as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison')
+        ->select('d.id, t.libelle as libelle, s.libelle as site, d.dateAjout as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison')
         ->join('d.typeDossier', 't')
         ->join('d.etat', 'e')
         ->join('d.site', 's')
@@ -93,7 +93,7 @@ public function lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin
         }
         if($filtre)
         {
-            $query->andWhere('d.libelle LIKE :filtre')
+            $query->andWhere('t.libelle LIKE :filtre')
                 ->setParameter('filtre', '%'.$filtre.'%');
         }
         if($my_site)
