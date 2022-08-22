@@ -53,7 +53,7 @@ class DossierRepository extends ServiceEntityRepository
 public function lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin, $offset,$limit,$filtre, $my_etat, $my_site)
 {
     $query = $this->createQueryBuilder('d')
-        ->select('d.id, t.libelle as libelle, s.libelle as site, d.dateAjout as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison')
+        ->select("d.id, t.libelle as libelle, s.libelle as site, DATE_FORMAT(d.dateAjout, '%Y-%m-%d') as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison")
         ->join('d.typeDossier', 't')
         ->join('d.etat', 'e')
         ->join('d.site', 's')
@@ -86,12 +86,7 @@ public function lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin
         if($limit != 'ALL'){
             $query->setFirstResult($offset)->setMaxResults($limit);
         }
-        if($filtre != ''){
-            $query
-                ->andWhere('d.libelle LIKE :filtre')
-                ->setParameter('filtre','%'.$filtre.'%');
-        }
-        if($filtre)
+        if($filtre || $filtre != '')
         {
             $query->andWhere('t.libelle LIKE :filtre')
                 ->setParameter('filtre', '%'.$filtre.'%');
@@ -140,14 +135,9 @@ public function countDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateF
         if($limit != 'ALL'){
             $query->setFirstResult($offset)->setMaxResults($limit);
         }
-        if($filtre != ''){
-            $query
-                ->andWhere('d.libelle LIKE :filtre')
-                ->setParameter('filtre','%'.$filtre.'%');
-        }
-        if($filtre)
+        if($filtre || $filtre != '')
         {
-            $query->andWhere('d.libelle LIKE :filtre')
+            $query->andWhere('t.libelle LIKE :filtre')
                 ->setParameter('filtre', '%'.$filtre.'%');
         }
         if($my_site)
