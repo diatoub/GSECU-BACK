@@ -51,14 +51,14 @@ class DossierController extends BaseController {
         return $this->dossierManager->check_dossier($this->getUser(),$codeDossier);
     }
 
-    /**
-     * @Rest\Post("/close_dossier/{id}", name="cloture_dossier")
-     * @QMLogger(message="Cloturer une demande/signalisation")
-     */
-    public function clotureAction(Request $request, $id) {
-        $post = json_decode($request->getContent(), true);
-        return $this->dossierManager->clotureAction($this->getUser(), $post, $id);
-    }
+    // /**
+    //  * @Rest\Post("/close_dossier/{id}", name="cloture_dossier")
+    //  * @QMLogger(message="Cloturer une demande/signalisation")
+    //  */
+    // public function clotureAction(Request $request, $id) {
+    //     $post = json_decode($request->getContent(), true);
+    //     return $this->dossierManager->clotureAction($this->getUser(), $post, $id);
+    // }
     
 }
 

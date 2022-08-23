@@ -147,43 +147,43 @@ class DossierManager extends BaseManager {
         ));        
     }
 
-    public function clotureAction($userConnect, $post, $id,) {
-        $my_dossier = $id ? $this->em->getRepository(Dossier::class)->find($id) : null ;
-        if (!$my_dossier) {
-            return $this->sendResponse(false, 404, "Dossier introuvable");      
-        }
-        $administrateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::SUPER_AGENT, Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
-        $signaleur = $my_dossier->getEmail();
-        $etats = [Etat::SIGNE, Etat::TRANSFERE];
-        if (!in_array($my_dossier->getEtat()->getLibelle(), $etats)) {
-            // passage au traitement
-            $etatDossier = $this->em->getRepository(Etat::class)->findOneBy(['libelle'=>$post['etat']]);
-            $my_dossier->setEtat( $etatDossier);
-            $my_dossier->setDateCloture (new \DateTime() );
-            !$my_dossier->getAgentExecution() ? $my_dossier->setAgentExecution($userConnect) : null;
-            $this->em->persist($my_dossier);
-            $this->em->flush ();
-            $suiviDelai = $this->em->getRepository(SuiviDelai::class)->findOneByDossier($my_dossier);
-            $delaiRequis = $this->em->getRepository(Dossier::class)->getNombreJourRequis($my_dossier->getId());
-            // $delaiRequis = $this->em->getRepository('App:Dossier')->getNombreJourRequis($my_dossier->getId()['nbreJoursLivraison']);         
+    // public function clotureAction($userConnect, $post, $id,) {
+    //     $my_dossier = $id ? $this->em->getRepository(Dossier::class)->find($id) : null ;
+    //     if (!$my_dossier) {
+    //         return $this->sendResponse(false, 404, "Dossier introuvable");      
+    //     }
+    //     $administrateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::SUPER_AGENT, Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
+    //     $signaleur = $my_dossier->getEmail();
+    //     $etats = [Etat::SIGNE, Etat::TRANSFERE];
+    //     if (!in_array($my_dossier->getEtat()->getLibelle(), $etats)) {
+    //         // passage au traitement
+    //         $etatDossier = $this->em->getRepository(Etat::class)->findOneBy(['libelle'=>$post['etat']]);
+    //         $my_dossier->setEtat( $etatDossier);
+    //         $my_dossier->setDateCloture (new \DateTime() );
+    //         !$my_dossier->getAgentExecution() ? $my_dossier->setAgentExecution($userConnect) : null;
+    //         $this->em->persist($my_dossier);
+    //         $this->em->flush ();
+    //         $suiviDelai = $this->em->getRepository(SuiviDelai::class)->findOneByDossier($my_dossier);
+    //         $delaiRequis = $this->em->getRepository(Dossier::class)->getNombreJourRequis($my_dossier->getId());
+    //         // $delaiRequis = $this->em->getRepository('App:Dossier')->getNombreJourRequis($my_dossier->getId()['nbreJoursLivraison']);         
             
-            $suiviDelai->setDateCloture(new \DateTime());
-            //dd($suiviDelai);
-            $dateOuverture = $suiviDelai->getDateOuverture();
-            $interval = $dateOuverture->diff(new \DateTime)->days;
-            $suiviDelai->setInterval($interval);
-            if($delaiRequis < $interval)
-            {
-                $suiviDelai->setIsHorsDelai(true);
-            }
-            $this->em->persist($suiviDelai);
-            $this->em->flush();
-            // add data on log file
-            $dossier = $my_dossier->getTypeDossier() ? $my_dossier->getTypeDossier()->getLibelle() : '';
-            $data_response = ['libelle' => $my_dossier->getLibelle(), 'type demande' => $dossier, 'Prenom demandeur' => $my_dossier->getFirstname(), 'Nom demandeur' => $my_dossier->getLastname()];
-        }
+    //         $suiviDelai->setDateCloture(new \DateTime());
+    //         //dd($suiviDelai);
+    //         $dateOuverture = $suiviDelai->getDateOuverture();
+    //         $interval = $dateOuverture->diff(new \DateTime)->days;
+    //         $suiviDelai->setInterval($interval);
+    //         if($delaiRequis < $interval)
+    //         {
+    //             $suiviDelai->setIsHorsDelai(true);
+    //         }
+    //         $this->em->persist($suiviDelai);
+    //         $this->em->flush();
+    //         // add data on log file
+    //         $dossier = $my_dossier->getTypeDossier() ? $my_dossier->getTypeDossier()->getLibelle() : '';
+    //         $data_response = ['libelle' => $my_dossier->getLibelle(), 'type demande' => $dossier, 'Prenom demandeur' => $my_dossier->getFirstname(), 'Nom demandeur' => $my_dossier->getLastname()];
+    //     }
 
-    }
+    // }
 }
 
 ?>
