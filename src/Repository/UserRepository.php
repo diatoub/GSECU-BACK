@@ -53,7 +53,7 @@ class UserRepository extends ServiceEntityRepository
         $query = $this->createQueryBuilder('q')
             ->join('q.profil', 'p')
             ->where('p.code = :code')
-            ->setParameter( 'code', Profil::ROLE_ADMINISTRATEUR)
+            ->setParameter( 'code', Profil::ADMINISTRATEUR)
             ->getQuery()
             ->getResult();
         return $query;
@@ -61,17 +61,18 @@ class UserRepository extends ServiceEntityRepository
 
     public function getUserByDossier($id, $code) {
         $query = $this->createQueryBuilder('u')
+            ->select('u.id, u.email, u.nom, u.prenom, u.telephone, p.code as profil')
             ->innerJoin('u.dossier', 'd')
             ->leftJoin('u.profil', 'p')
             ->where('d.id = :id')
-            ->andWhere('p.code = :code')
+            ->andWhere('p.code in (:code)')
             ->setParameters(array(
                 'id' => $id,
                 'code' => $code
             ))
             ->getQuery()
             ->getResult();
-        return $query;
+            return $query;
     }
 
     public function getUserByProfil($code) {

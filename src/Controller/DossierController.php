@@ -41,6 +41,24 @@ class DossierController extends BaseController {
     public function detailDossier($id) {
         return $this->dossierManager->detailDossier($this->getUser(),$id);
     }
+
+    /**
+     * @Rest\Post("/check_dossier", name="check_dossier")
+     * @QMLogger(message="recherche dossier par codeDossier")
+     */
+    public function check_dossier(Request $request) {
+        $codeDossier = json_decode($request->getContent(), true);
+        return $this->dossierManager->check_dossier($this->getUser(),$codeDossier);
+    }
+
+    /**
+     * @Rest\Post("/close_dossier/{id}", name="cloture_dossier")
+     * @QMLogger(message="Cloturer une demande/signalisation")
+     */
+    public function clotureAction(Request $request, $id) {
+        $post = json_decode($request->getContent(), true);
+        return $this->dossierManager->clotureAction($this->getUser(), $post, $id);
+    }
     
 }
 

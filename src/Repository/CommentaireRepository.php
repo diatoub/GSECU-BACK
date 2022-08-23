@@ -20,14 +20,12 @@ class CommentaireRepository extends ServiceEntityRepository
     }
 
     public function getCommentaireByDossier($id) {
-
         $query = $this->createQueryBuilder('c')
+            ->select('c.id, c.libelle, c.path, c.commentaire')
             ->innerJoin('c.dossier', 'd')
             ->where('d.id = :id')
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getResult();
-        return $query;
+            ->setParameter('id', $id);
+        return $query->getQuery()->getResult();
     }
 
     // /**

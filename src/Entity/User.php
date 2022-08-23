@@ -55,7 +55,7 @@ class User extends BaseUser
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
-     * @ORM\ManyToMany(targetEntity="Dossier", mappedBy="User")
+     * @ORM\ManyToMany(targetEntity="Dossier", mappedBy="user")
      */
     protected $dossier;
 

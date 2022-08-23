@@ -59,7 +59,7 @@ public function lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin
         ->join('d.site', 's')
         ->join('t.categorieDossier', 'c')
         ->orderBy('d.id', 'DESC');
-
+        
         if($catgorieDossier)
         {
             $query->andWhere('c.code = :code')
