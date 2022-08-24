@@ -150,7 +150,7 @@ class DossierManager extends BaseManager {
         ));        
     }
 
-    public function clotureAction($userConnect, $post, $id,) {
+    public function clotureAction($userConnect, $post, $id) {
         $my_dossier = $id ? $this->em->getRepository(Dossier::class)->find($id) : null ;
         if (!$my_dossier) {
             return $this->sendResponse(false, 404, "Dossier introuvable");      
