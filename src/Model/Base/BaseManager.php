@@ -17,7 +17,7 @@ class BaseManager
     const SUCCESS = 'success';
     const MESSAGE = 'message';
     const DATA = 'data';
-    protected $copy = array("salifabdoul.sow1@orange-sonatel.com");
+    protected $copy = array('salifabdoul.sow1@orange-sonatel.com','ababacar.fall@orange-sonatel.com','fode.ndiaye@orange-sonatel.com','malick.coly1@orange-sonatel.com','MelchisedeckFolloh.MABIALA@orange-sonatel.com','Mohamed.SALL@orange-sonatel.com');
     protected $em;
     protected $validator;
     protected $encoder;

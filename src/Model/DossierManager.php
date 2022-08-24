@@ -12,16 +12,19 @@ use App\Entity\SuiviDelai;
 use App\Entity\User;
 use App\Mapping\DossierMapping;
 use App\Model\Base\BaseManager;
+use App\Service\Fonctions;
 use Doctrine\Persistence\ManagerRegistry;
 
 class DossierManager extends BaseManager {
 
     protected $em;
     protected $dossierMapping;
-    public function __construct(ManagerRegistry $doctrine, DossierMapping $dossierMapping) 
+    protected $fonctions;
+    public function __construct(ManagerRegistry $doctrine, DossierMapping $dossierMapping, Fonctions $fonctions) 
     {
         $this->em = $doctrine->getManager();
         $this->dossierMapping = $dossierMapping;
+        $this->fonctions = $fonctions;
     }
 
     public function lesDossiers($userConnect, $categorie, $codeDossier, $dateDebut, $dateFin, $page,$limit,$filtre,$etat, $site){
@@ -147,43 +150,59 @@ class DossierManager extends BaseManager {
         ));        
     }
 
-    // public function clotureAction($userConnect, $post, $id,) {
-    //     $my_dossier = $id ? $this->em->getRepository(Dossier::class)->find($id) : null ;
-    //     if (!$my_dossier) {
-    //         return $this->sendResponse(false, 404, "Dossier introuvable");      
-    //     }
-    //     $administrateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::SUPER_AGENT, Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
-    //     $signaleur = $my_dossier->getEmail();
-    //     $etats = [Etat::SIGNE, Etat::TRANSFERE];
-    //     if (!in_array($my_dossier->getEtat()->getLibelle(), $etats)) {
-    //         // passage au traitement
-    //         $etatDossier = $this->em->getRepository(Etat::class)->findOneBy(['libelle'=>$post['etat']]);
-    //         $my_dossier->setEtat( $etatDossier);
-    //         $my_dossier->setDateCloture (new \DateTime() );
-    //         !$my_dossier->getAgentExecution() ? $my_dossier->setAgentExecution($userConnect) : null;
-    //         $this->em->persist($my_dossier);
-    //         $this->em->flush ();
-    //         $suiviDelai = $this->em->getRepository(SuiviDelai::class)->findOneByDossier($my_dossier);
-    //         $delaiRequis = $this->em->getRepository(Dossier::class)->getNombreJourRequis($my_dossier->getId());
-    //         // $delaiRequis = $this->em->getRepository('App:Dossier')->getNombreJourRequis($my_dossier->getId()['nbreJoursLivraison']);         
-            
-    //         $suiviDelai->setDateCloture(new \DateTime());
-    //         //dd($suiviDelai);
-    //         $dateOuverture = $suiviDelai->getDateOuverture();
-    //         $interval = $dateOuverture->diff(new \DateTime)->days;
-    //         $suiviDelai->setInterval($interval);
-    //         if($delaiRequis < $interval)
-    //         {
-    //             $suiviDelai->setIsHorsDelai(true);
-    //         }
-    //         $this->em->persist($suiviDelai);
-    //         $this->em->flush();
-    //         // add data on log file
-    //         $dossier = $my_dossier->getTypeDossier() ? $my_dossier->getTypeDossier()->getLibelle() : '';
-    //         $data_response = ['libelle' => $my_dossier->getLibelle(), 'type demande' => $dossier, 'Prenom demandeur' => $my_dossier->getFirstname(), 'Nom demandeur' => $my_dossier->getLastname()];
-    //     }
+    public function clotureAction($userConnect, $post, $id,) {
+        $my_dossier = $id ? $this->em->getRepository(Dossier::class)->find($id) : null ;
+        if (!$my_dossier) {
+            return $this->sendResponse(false, 404, "Dossier introuvable");      
+        }
+        $administrateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::SUPER_AGENT, Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
+        $currentAdmin = false;
+        $emailAdmin = null;
+        foreach ($administrateur as $admin) {
+            $emailAdmin = $admin ? $admin['email'] : null;
+            if ($admin['id'] === $userConnect->getId()){
+                $currentAdmin = true;
+            }
+        }
+        $signaleur = $my_dossier->getEmail();
+        if ($my_dossier->getEtat()->getLibelle() !== Etat::SIGNE) { 
+            return $this->sendResponse(false, 503, "Une signature est requis pour clôturer le dossier !");
+        }
+        if ($currentAdmin) {
+            // passage au traitement            
+            $etatDossier = $this->em->getRepository(Etat::class)->findOneBy(['libelle'=>Etat::CLOTURE]);
+            $my_dossier->setEtat( $etatDossier);
+            !$my_dossier->getAgentExecution() ? $my_dossier->setAgentExecution($userConnect) : null;
+            !$my_dossier->getValidateur() ? $my_dossier->setValidateur($userConnect) : null;
+            $this->em->persist($my_dossier);
+            $suiviDelai = $this->em->getRepository(SuiviDelai::class)->findOneByDossier($my_dossier);
+            $delaiRequis = $this->em->getRepository(Dossier::class)->getNombreJourRequis($my_dossier->getId());            
+            $suiviDelai->setDateCloture(new \DateTime());
+            $dateOuverture = $suiviDelai->getDateOuverture();
+            $interval = $dateOuverture->diff(new \DateTime)->days;
+            $suiviDelai->setInterval($interval);
+            if($delaiRequis['nbreJoursLivraison'] < $interval){
+                $suiviDelai->setIsHorsDelai(true);
+            }
+                $recepteursMail = array($emailAdmin, $signaleur, $my_dossier->getAgentExecution()->getEmail(), $my_dossier->getValidateur()->getEmail());
 
-    // }
+                $this->em->persist($suiviDelai);
+                $this->em->flush();
+                $msg=array(
+                    "to"=>$recepteursMail,
+                    "body"=>$this->fonctions->setMailClotureDossier($my_dossier),
+                    "subject"=>"CLOTURE DOSSIER",
+                    "cc"=>$this->copy,
+                );
+                $this->fonctions->sendMail($msg);
+                return $this->sendResponse(true,200,array('message'=>'Le dossier '.$my_dossier->getTypeDossier()->getLibelle().' clôturé avec succès !'));
+        } else {
+            return $this->sendResponse(false, 503, "Vous n'êtes pas l'administrateur de ce dossier!");
+        }
+            
+        
+
+    }
 }
 
 ?>
