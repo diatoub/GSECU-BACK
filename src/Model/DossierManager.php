@@ -95,13 +95,14 @@ class DossierManager extends BaseManager {
             'info_beneficiaire' => $info_beneficiaire
         ));        
     }
+
     public function check_dossier($userConnect, $codeDossier){
         $my_dossier = $codeDossier ? $this->em->getRepository(Dossier::class)->findOneBy(['codeDossier' => $codeDossier]) : null ;
+        if (!$my_dossier) {
+            return $this->sendResponse(false, 503, "Dossier introuvable");            
+        }
         $pieces_jointes = $this->em->getRepository(ComplementDossier::class)->getComplementByDossier($my_dossier->getId());
         $preuve = $this->em->getRepository(Commentaire::class)->getCommentaireByDossier($my_dossier->getId());
-        if (!$my_dossier) {
-            return $this->sendResponse(true, 200, "Dossier introuvable");            
-        }
         $etats = [Etat::NOUVEAU, Etat::OUVERT];
         if (in_array($my_dossier->getEtat()->getLibelle(), $etats)) {
             $executeur = array();
@@ -150,7 +151,11 @@ class DossierManager extends BaseManager {
         ));        
     }
 
-    public function clotureAction($userConnect, $post, $id) {
+    public function clotureAction($userConnect, $id) {
+        $profil = $userConnect->getProfil() ? $userConnect->getProfil()->getCode() : null;
+        if ($profil != Profil::ADMINISTRATEUR  && $profil != Profil::SUPER_ADMINISTRATEUR && $profil != Profil::SUPER_AGENT) {
+            return $this->sendResponse(false, 503, array('message' => "Vous n'êtes pas autorisés à faire cet action"));
+        }
         $my_dossier = $id ? $this->em->getRepository(Dossier::class)->find($id) : null ;
         if (!$my_dossier) {
             return $this->sendResponse(false, 404, "Dossier introuvable");      
@@ -198,11 +203,65 @@ class DossierManager extends BaseManager {
                 return $this->sendResponse(true,200,array('message'=>'Le dossier '.$my_dossier->getTypeDossier()->getLibelle().' clôturé avec succès !'));
         } else {
             return $this->sendResponse(false, 503, "Vous n'êtes pas l'administrateur de ce dossier!");
-        }
-            
-        
-
+        }  
     }
+    
+    public function nouvelleAction($userConnect, $post) {
+        $entity = new Dossier();
+        $signaleur = $post['signaleur'] ? $this->em->getRepository(User::class)->find($post['signaleur']) : null ;
+        // tester si cest en mode post notify
+            $user = $userConnect ? $userConnect : $signaleur;
+            if ($user) {
+                $entity->setLastname($user->getNom());
+                $entity->setFirstname($user->getPrenom());
+                $entity->setMobile($user->getTelephone());
+                $entity->setEmail($user->getEmail());
+                $entity->setStructure($user->getStructure());
+                $entity->removeUser($user);
+            }
+            $fichiertmp = $entity->getFileBeneficiaires()? $entity->getFileBeneficiaires()->getRealPath(): null;//Récupère le chemin temporaire sur la machine cliente
+            $typeFichier = $entity->getFileBeneficiaires()?$entity->getFileBeneficiaires()->getClientMimeType():null;
+            foreach ($entity->getComplementDossier() as $complement){ //Permet d'obtenir le path des fichiers uploadés
+                $complement->preUpload();
+                $complement->upload($this->getParameter('doc_directory'));
+                //$complement->upload($this->getParameter('kernel.project_dir'));
+            }
+            $etatDossier = $this->em->getRepository(Etat::class)->findOneBy(['libelle'=>Etat::NOUVEAU]);
+            $entity->setEtat( $etatDossier );
+            $countByMonth = $this->em->getRepository(Dossier::class)->getCountByMonth();
+            if($countByMonth === NULL){
+                $countByMonth = 0;
+            }
+            $count = intval($countByMonth) + 1;
+            //$unique_id = str_pad($count, 4, '0', STR_PAD_LEFT);
+            $unique_id = GenerateUtils::newKey($em);
+            switch ($categorie)
+            {
+                case CategorieDossier::SIGNALISATION:
+                    $code = "SIG".date("Y").date("m").$unique_id['uniqueDossier'];
+                    break;
+                case CategorieDossier::DEMANDE:
+                    $code = "DEM".date("Y").date("m").$unique_id['uniqueDossier'];
+                    break;
+                case CategorieDossier::QRCODE:
+                    $code = "QRC".date("Y").date("m").$unique_id['uniqueDossier'];
+                    break;
+            }
+            foreach($entity->getSites() as $site){
+                $entity->addSiteAutorisation($site);
+            }
+                // Cryptage du code du dossier en md5
+                $codeSecret = md5($code);
+                $entity->setCodeDossier($code);
+                $entity->setCodeSecret($codeSecret);
+                $this->em->persist($entity);
+                $this->em->flush();
+
+                // Envoie de mail à tous les admins pour notifier du nouveau dossier
+                // Envoi de mail à tous les administrateurs
+                //$admin = $em->getRepository(Utilisateur::class)->getAdmin();
+                $admin_and_executeur = $this->em->getRepository(User::class)->getAdminAndExecuteur();
+            }
 }
 
 ?>

@@ -34,6 +34,14 @@ class EquipementController extends BaseController {
         $data = json_decode($request->getContent(), true);
         return $this->equipementManager->addEquipement($data, $this->getUser(),'add');
     }
+    /**
+     * @Rest\Post("/editEquipement", name="editEquipement")
+     * @QMLogger(message="Edité un équipement")
+     */
+    public function editEquipement(Request $request ) {
+        $data = json_decode($request->getContent(), true);
+        return $this->equipementManager->addEquipement($data, $this->getUser(),'edit');
+    }
 
     /**
      * @Rest\Delete("/deleteEquipement/{id}", name="delete_equipement")

@@ -13,7 +13,7 @@ class Profil
     const EXECUTEUR      		 = 'EXECUTEUR';
     const SUPER_AGENT     		 = 'SUPER_AGENT';
     const ADMINISTRATEUR		 = 'ADMIN';
-    const SUPER_ADMINISTRATEUR  = 'SUPER_ADMIN';
+    const SUPER_ADMINISTRATEUR   = 'SUPER_ADMIN';
     const DEMANDEUR  			 = 'DEMANDEUR';
     const DGSECU 			     = 'DGSECU';
 

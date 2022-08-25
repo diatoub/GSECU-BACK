@@ -53,13 +53,12 @@ class DossierRepository extends ServiceEntityRepository
 public function lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin, $offset,$limit,$filtre, $my_etat, $my_site)
 {
     $query = $this->createQueryBuilder('d')
-        ->select("d.id, t.libelle as libelle, s.libelle as site, DATE_FORMAT(d.dateAjout, '%Y-%m-%d') as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison")
+        ->select("d.id, t.libelle as libelle, DATE_FORMAT(d.dateAjout, '%Y-%m-%d') as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison")
         ->join('d.typeDossier', 't')
         ->join('d.etat', 'e')
-        ->join('d.site', 's')
-        ->join('t.categorieDossier', 'c')
+        ->join('t.categorieDossier', 'c')        
         ->orderBy('d.id', 'DESC');
-        
+
         if($catgorieDossier)
         {
             $query->andWhere('c.code = :code')
@@ -90,11 +89,6 @@ public function lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin
         {
             $query->andWhere('t.libelle LIKE :filtre')
                 ->setParameter('filtre', '%'.$filtre.'%');
-        }
-        if($my_site)
-        {
-            $query->andWhere('s.libelle = :site')
-                ->setParameter('site', $my_site);
         }
 
     return $query->getQuery()->getResult();
@@ -105,8 +99,7 @@ public function countDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateF
         ->select('count(d.id)')
         ->join('d.typeDossier', 't')
         ->join('d.etat', 'e')
-        ->join('d.site', 's')
-        ->join('t.categorieDossier', 'c')
+        ->join('t.categorieDossier', 'c')        
         ->orderBy('d.id', 'DESC');
 
         if($catgorieDossier)
@@ -139,11 +132,6 @@ public function countDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateF
         {
             $query->andWhere('t.libelle LIKE :filtre')
                 ->setParameter('filtre', '%'.$filtre.'%');
-        }
-        if($my_site)
-        {
-            $query->andWhere('s.libelle = :site')
-                ->setParameter('site', $my_site);
         }
 
         return $query->getQuery()->getSingleScalarResult();

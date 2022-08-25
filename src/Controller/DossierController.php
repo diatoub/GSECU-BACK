@@ -50,16 +50,23 @@ class DossierController extends BaseController {
         $codeDossier = json_decode($request->getContent(), true);
         return $this->dossierManager->check_dossier($this->getUser(),$codeDossier);
     }
-
+    
     /**
      * @Rest\Post("/close_dossier/{id}", name="cloture_dossier")
      * @QMLogger(message="Cloturer une demande/signalisation")
      */
-    public function clotureAction(Request $request, $id) {
-        $post = json_decode($request->getContent(), true);
-        return $this->dossierManager->clotureAction($this->getUser(), $post, $id);
+    public function clotureAction($id) {
+        return $this->dossierManager->clotureAction($this->getUser(), $id);
     }
     
+    /**
+     * @Rest\Post("/nouvelleAction", name="nouvelleAction")
+     * @QMLogger(message="Ajouter une demande/signalisation/qrcode")
+     */
+    public function nouvelleAction(Request $request) {
+        $codeDossier = json_decode($request->getContent(), true);
+        return $this->dossierManager->nouvelleAction($this->getUser(),$codeDossier);
+    }
 }
 
 ?>

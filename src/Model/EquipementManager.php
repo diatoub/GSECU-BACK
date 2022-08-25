@@ -25,6 +25,7 @@ class EquipementManager extends BaseManager {
     }
 
     public function addEquipement($data, $userConnect, $action) {
+        $id = $action ==  $this::EDIT ? $data['id'] : null;
         $profil = $userConnect->getProfil() ? $userConnect->getProfil()->getCode() : null;
         if ($profil != Profil::ADMINISTRATEUR  && $profil != Profil::SUPER_ADMINISTRATEUR && $profil != Profil::SUPER_AGENT && $profil != Profil::EXECUTEUR) {
             return $this->sendResponse(false, 503, array('message' => "Vous n'êtes pas autorisés à faire cet action"));
@@ -33,15 +34,17 @@ class EquipementManager extends BaseManager {
         $message = $action ==  $this::ADD ? $this::AJOUTE : $this::UPDATE;
         if ($equipement == null) {
             return $this->sendResponse(false, 501, array('message' => "Equipement introuvable!"));           
-        }
-        if(!$data['libelle']){
+        }        
+        $equipement =  $this->equipementM->setEquipementData($data, $equipement);
+        if(!$equipement->getLibelle()){
             return $this->sendResponse(false, 501, array('message' => "Le libelle est obligatoire!"));
         }
-        $data['libelle'] = isset($data['libelle']) ? $data['libelle'] : $equipement->getLibelle();
-        $data['description'] = isset($data['description']) ? $data['description'] : $equipement->getDescription();
-        $equipement =  $this->equipementM->setEquipementData($data, $equipement);
         $isExist = $this->em->getRepository(Equipement :: class)->findOneBy(['libelle'=>$equipement->getLibelle()]);
-        if ($isExist) {
+        if ($isExist &&  $id) {
+            if ($isExist->getId() != $id) {
+                return $this->sendResponse(false, 501, array('message' => "Equipement existe déjà!"));
+            }
+        }elseif ($isExist && !$id) {
             return $this->sendResponse(false, 501, array('message' => "Equipement existe déjà!"));
         }
         $this->em->persist($equipement);
