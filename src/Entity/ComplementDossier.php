@@ -97,7 +97,7 @@ class ComplementDossier
             return;
         }
 
-        $this->file->move($this->getUploadRootDir($doc_dir), $this->path);
+        $this->file->move($doc_dir, $this->path);
 
         //unset($this->file);
         $this->file = null;

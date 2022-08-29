@@ -61,7 +61,7 @@ class AuthenticationSuccessListener
 			if (!$user instanceof UserInterface) {
 				return;
 			}
-            $data['success'] = true;
+            $data['status'] = true;
             $data['code'] = 200;
 			$data['data'] = array(
 					'id'			=> $user->getId(),

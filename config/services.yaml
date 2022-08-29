@@ -7,8 +7,8 @@ parameters:
     base_dn: dc=orange-sonatel,dc=com
     search_dn: "cn=read-only-admin,dc=orange-sonatel,dc=com"
     dn_string: 'ORANGE-SONATEL\{username}'
-    images_directory: '%kernel.project_dir%/public/uploads'
-    document_directory: '%kernel.project_dir%/public/uploads'
+    images_directory: '%kernel.project_dir%/public/uploads/images'
+    document_directory: '%kernel.project_dir%/public/uploads/documents'
 
 services:
     # default configuration for services in *this* file

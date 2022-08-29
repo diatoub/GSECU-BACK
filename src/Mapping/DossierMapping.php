@@ -25,8 +25,8 @@ class DossierMapping  {
             "typeMateriel"=> $dossier->getTypeMateriel() ? $dossier->getTypeMateriel()->getLibelle() : null,
             "typeDossier"=> $dossier->getTypeDossier() ? $dossier->getTypeDossier()->getLibelle() : null,
             "dateAjout"=> $dossier->getDateAjout() ? date_format($dossier->getDateAjout(), 'd-m-Y'): null,
-            "dateDebut"=> $dossier->getDateDebut() ? $dossier->getDateDebut() : null,
-            "dateFin"=> $dossier->getDateFin() ? $dossier->getDateFin() : null,
+            "dateDebut"=> $dossier->getDateDebut() ? date_format($dossier->getDateDebut(), 'd-m-Y') : null,
+            "dateFin"=> $dossier->getDateFin() ? date_format($dossier->getDateFin(), 'd-m-Y') : null,
             "dureeValidite"=> $dossier->getDureeValidite() ? date_format($dossier->getDureeValidite(), 'd-m-Y') : null
         );
     }

@@ -145,9 +145,7 @@ public function countDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateF
             ->select('q.id as last_id')
             ->orderBy('q.dateAjout', 'ASC')
             ->setMaxResults($limit)
-            ->getQuery()
-            ->getOneOrNullResult()
-            ;
+            ->getQuery()->getOneOrNullResult();
     }
 
     public function getTotauxByDossier($categorie, $entity)

@@ -9,10 +9,13 @@ use App\Entity\Etat;
 use App\Entity\Profil;
 use App\Entity\Site;
 use App\Entity\SuiviDelai;
+use App\Entity\TypeDossier;
+use App\Entity\TypeMateriel;
 use App\Entity\User;
 use App\Mapping\DossierMapping;
 use App\Model\Base\BaseManager;
 use App\Service\Fonctions;
+use App\Utils\GenerateUtils;
 use Doctrine\Persistence\ManagerRegistry;
 
 class DossierManager extends BaseManager {
@@ -20,11 +23,13 @@ class DossierManager extends BaseManager {
     protected $em;
     protected $dossierMapping;
     protected $fonctions;
-    public function __construct(ManagerRegistry $doctrine, DossierMapping $dossierMapping, Fonctions $fonctions) 
+    protected $generateUtils;
+    public function __construct(ManagerRegistry $doctrine, DossierMapping $dossierMapping, Fonctions $fonctions, GenerateUtils $generateUtils) 
     {
         $this->em = $doctrine->getManager();
         $this->dossierMapping = $dossierMapping;
         $this->fonctions = $fonctions;
+        $this->generateUtils = $generateUtils;
     }
 
     public function lesDossiers($userConnect, $categorie, $codeDossier, $dateDebut, $dateFin, $page,$limit,$filtre,$etat, $site){
@@ -206,7 +211,71 @@ class DossierManager extends BaseManager {
         }  
     }
     
-    public function nouvelleAction($userConnect, $post) {
+    public function nouvelleSignalisation($userConnect, $post) {
+        $entity = new Dossier();
+        $signaleur = $post['signaleur'] ? $this->em->getRepository(User::class)->find($post['signaleur']) : null ;
+        // tester si cest en mode post notify
+            $user = $userConnect ? $userConnect : $signaleur;
+            if ($user) {
+                $entity->setLastname($user->getNom());
+                $entity->setFirstname($user->getPrenom());
+                $entity->setMobile($user->getTelephone());
+                $entity->setEmail($user->getEmail());
+                $entity->setStructure($user->getStructure());
+            }
+            $libelle = $post['libelle'] ? $post['libelle'] : null;
+            $autre_materiel = $post['autre_materiel'] ? $post['autre_materiel'] : null;
+            $description_panne = $post['description_panne'] ? $post['description_panne'] : null;
+            $quantite_panne = $post['quantite_panne'] ? $post['quantite_panne'] : null;
+            $site = $post['site'] ? $this->em->getRepository(Site::class)->find($post['site']) : null;
+            $type_signalisation = $post['type_signalisation'] ? $this->em->getRepository(TypeDossier::class)->find($post['type_signalisation']) : null;
+            $materiel_panne = $post['materiel_panne'] ? $this->em->getRepository(TypeMateriel::class)->find($post['materiel_panne']) : null;
+            $site = $post['site'] ? $this->em->getRepository(Site::class)->find($post['site']) : null;
+            if (!$materiel_panne) {
+                return $this->sendResponse(false, 404, "Materiel en panne introuvable");
+            }
+            if (!$type_signalisation) {
+                return $this->sendResponse(false, 404, "Type de signalisation introuvable");
+            }
+            if (!$site) {
+                return $this->sendResponse(false, 404, "Site introuvable");
+            }
+            $entity->setSite($site);
+            $entity ->setTypeDossier($type_signalisation);
+            $entity->setTypeMateriel($materiel_panne);
+            $entity->setLibelle($libelle);
+            $entity->setAutreMateriel($autre_materiel);
+            $entity->setQuantite($quantite_panne);
+            $entity->setDescription($description_panne);
+            $entity->setDateAjout(new \DateTime());
+
+            $fichiertmp = $entity->getFileBeneficiaires()? $entity->getFileBeneficiaires()->getRealPath(): null;//Récupère le chemin temporaire sur la machine cliente
+            $typeFichier = $entity->getFileBeneficiaires()?$entity->getFileBeneficiaires()->getClientMimeType():null;
+            foreach ($post['file'] as $fichier){ //Permet d'obtenir le path des fichiers uploadés
+                $complement = new ComplementDossier();
+                $complement->file = $fichier;
+                $complement->preUpload();
+                $complement->upload($post['document_directory']);
+                $this->em->persist($complement);
+            }
+            $etatDossier = $this->em->getRepository(Etat::class)->findOneBy(['libelle'=>Etat::NOUVEAU]);
+            $entity->setEtat( $etatDossier );
+            $unique_id =$this->generateUtils->newKey($this->em);
+            $code = "SIG".date("Y").date("m").$unique_id['uniqueDossier'];
+            // Cryptage du code du dossier en md5
+            $codeSecret = md5($code);
+            $entity->setCodeDossier($code);
+            $entity->setCodeSecret($codeSecret);
+            $admin_and_executeur = $this->em->getRepository(User::class)->getAdminAndExecuteur(true);
+            dd($admin_and_executeur);
+            $this->em->persist($entity);
+            $this->em->flush();
+
+            // Envoie de mail à tous les admins pour notifier du nouveau dossier
+            // Envoi de mail à tous les administrateurs
+    }
+
+    public function nouvelleDemande($userConnect, $post) {
         $entity = new Dossier();
         $signaleur = $post['signaleur'] ? $this->em->getRepository(User::class)->find($post['signaleur']) : null ;
         // tester si cest en mode post notify
@@ -261,7 +330,7 @@ class DossierManager extends BaseManager {
                 // Envoi de mail à tous les administrateurs
                 //$admin = $em->getRepository(Utilisateur::class)->getAdmin();
                 $admin_and_executeur = $this->em->getRepository(User::class)->getAdminAndExecuteur();
-            }
+    }
 }
 
 ?>
