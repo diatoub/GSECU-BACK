@@ -206,8 +206,8 @@ class DossierManager extends BaseManager {
                 );
                 $this->fonctions->sendMail($msg);
                 return $this->sendResponse(true,200,array('message'=>'Le dossier '.$my_dossier->getTypeDossier()->getLibelle().' clôturé avec succès !'));
-        } else {
-            return $this->sendResponse(false, 503, "Vous n'êtes pas l'administrateur de ce dossier!");
+            } else {
+                return $this->sendResponse(false, 503, "Vous n'êtes pas l'administrateur de ce dossier!");
         }  
     }
     
@@ -249,13 +249,15 @@ class DossierManager extends BaseManager {
             $entity->setDescription($description_panne);
             $entity->setDateAjout(new \DateTime());
 
-            $fichiertmp = $entity->getFileBeneficiaires()? $entity->getFileBeneficiaires()->getRealPath(): null;//Récupère le chemin temporaire sur la machine cliente
-            $typeFichier = $entity->getFileBeneficiaires()?$entity->getFileBeneficiaires()->getClientMimeType():null;
+            // $fichiertmp = $entity->getFileBeneficiaires()? $entity->getFileBeneficiaires()->getRealPath(): null;//Récupère le chemin temporaire sur la machine cliente
+            // $typeFichier = $entity->getFileBeneficiaires()?$entity->getFileBeneficiaires()->getClientMimeType():null;
             foreach ($post['file'] as $fichier){ //Permet d'obtenir le path des fichiers uploadés
                 $complement = new ComplementDossier();
                 $complement->file = $fichier;
                 $complement->preUpload();
                 $complement->upload($post['document_directory']);
+                $complement->setLibelle($post['libellePiece'] ? $post['libellePiece'] : null);
+                $entity->addComplementDossier($complement);
                 $this->em->persist($complement);
             }
             $etatDossier = $this->em->getRepository(Etat::class)->findOneBy(['libelle'=>Etat::NOUVEAU]);
@@ -267,12 +269,24 @@ class DossierManager extends BaseManager {
             $entity->setCodeDossier($code);
             $entity->setCodeSecret($codeSecret);
             $admin_and_executeur = $this->em->getRepository(User::class)->getAdminAndExecuteur(true);
-            dd($admin_and_executeur[0]["emailAdmin"]);
+            $email = "salifabdoul.sow1@orange-sonatel.com,ababacar.fall@orange-sonatel.com,malick.coly1@orange-sonatel.com";
+            $recepteursMail = explode(',', $email);
+            // $recepteursMail = explode(',', $admin_and_executeur[0]["emailAdmin"]);
+
             $this->em->persist($entity);
             $this->em->flush();
-
             // Envoie de mail à tous les admins pour notifier du nouveau dossier
             // Envoi de mail à tous les administrateurs
+            $msg=array(
+                "to"=>$recepteursMail,
+                "body"=>$this->fonctions->setMailNouvelleDossier($entity),
+                "subject"=>"NOUVELLE DEMANDE",
+                "cc"=>$this->copy,
+            );
+            $this->fonctions->sendMail($msg);
+            return $this->sendResponse(true,200,array('message'=>'Une nouvelle signalisation intitulée '.$entity->getTypeDossier()->getLibelle().' ajoutée avec succès !'));
+            
+
     }
 
     public function nouvelleDemande($userConnect, $post) {

@@ -34,4 +34,13 @@ namespace App\Service;
                          <span><strong>Pour acceder à l'application GSECU, </strong><a style='color: #FF6600' href='http://gsecu.orange-sonatel.com'> cliquez ici </a>!</span><br>
                             </p>";
     }
+
+    public function setMailNouvelleDossier($data){
+    return "<span style='font-size: 40px;color:#FF6600'>GESTION DES DEMANDES ET SIGNALISATIONS ".date("Y")."</span>
+                         <br> <br><strong><p>Une nouvelle signalisation intitulée ".$data->getTypeDossier()->getLibelle()." a été ajoutée par l\'utilisateur " . $data->getLastName()." ".$data->getFirstname() ." ce ". date ("d-m-y") . "
+                         Merci de vous connecter pour plus d\'informations sur la demande et l\'ouvrir pour traitement.</strong> <br><br>
+                         <strong>Rappel: </strong> <br>
+                         <span><strong>Pour acceder à l'application GSECU, </strong><a style='color: #FF6600' href='http://gsecu.orange-sonatel.com'> cliquez ici </a>!</span><br>
+                            </p>";
+    }
  }
