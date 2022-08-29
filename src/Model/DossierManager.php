@@ -279,11 +279,18 @@ class DossierManager extends BaseManager {
             // Envoi de mail à tous les administrateurs
             $msg=array(
                 "to"=>$recepteursMail,
-                "body"=>$this->fonctions->setMailNouvelleDossier($entity),
-                "subject"=>"NOUVELLE DEMANDE",
+                "body"=>$this->fonctions->setMailAdminNouvelleDossier($entity),
+                "subject"=>"NOUVELLE SIGNALISATION",
+                "cc"=>$this->copy,
+            );
+            $msg1=array(
+                "to"=>$entity->getEmail(),
+                "body"=>$this->fonctions->setMailSignaleurNouvelleDossier($entity),
+                "subject"=>"NOUVELLE SIGNALISATION",
                 "cc"=>$this->copy,
             );
             $this->fonctions->sendMail($msg);
+            $this->fonctions->sendMail($msg1);
             return $this->sendResponse(true,200,array('message'=>'Une nouvelle signalisation intitulée '.$entity->getTypeDossier()->getLibelle().' ajoutée avec succès !'));
             
 
