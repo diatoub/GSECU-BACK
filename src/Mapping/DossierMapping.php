@@ -18,10 +18,14 @@ class DossierMapping  {
     public function mappingDossier($dossier) {
         return array(
             "id"=> $dossier->getId() ? $dossier->getId() : null,
+            "libelle"=> $dossier->getLibelle() ? $dossier->getLibelle() : null,
+            "description"=> $dossier->getDescription() ? $dossier->getDescription() : null,
             "codeDossier"=> $dossier->getCodeDossier() ? $dossier->getCodeDossier() : null,
             "etatTraitement"=> $dossier->getEtat() ? $dossier->getEtat()->getLibelle() : null,
             "siteBeneficiaire"=> $dossier->getSiteBeneficiaire() ? $dossier->getSiteBeneficiaire()->getLibelle() : null,
             "site"=> $dossier->getSite() ? $dossier->getSite()->getLibelle() : null,
+            "motifDemande"=> $dossier->getMotifDemande() ? $dossier->getMotifDemande()->getLibelle() : null,
+            "typeBadge"=> $dossier->getTypeBadge() ? $dossier->getTypeBadge()->getLibelle() : null,
             "typeMateriel"=> $dossier->getTypeMateriel() ? $dossier->getTypeMateriel()->getLibelle() : null,
             "typeDossier"=> $dossier->getTypeDossier() ? $dossier->getTypeDossier()->getLibelle() : null,
             "dateAjout"=> $dossier->getDateAjout() ? date_format($dossier->getDateAjout(), 'd-m-Y'): null,
