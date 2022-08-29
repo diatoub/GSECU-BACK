@@ -267,7 +267,7 @@ class DossierManager extends BaseManager {
             $entity->setCodeDossier($code);
             $entity->setCodeSecret($codeSecret);
             $admin_and_executeur = $this->em->getRepository(User::class)->getAdminAndExecuteur(true);
-            dd($admin_and_executeur);
+            dd($admin_and_executeur[0]["emailAdmin"]);
             $this->em->persist($entity);
             $this->em->flush();
 

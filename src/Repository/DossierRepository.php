@@ -53,8 +53,9 @@ class DossierRepository extends ServiceEntityRepository
 public function lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin, $offset,$limit,$filtre, $my_etat, $my_site)
 {
     $query = $this->createQueryBuilder('d')
-        ->select("d.id, t.libelle as libelle, DATE_FORMAT(d.dateAjout, '%Y-%m-%d') as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison")
+        ->select("d.id, t.libelle as libelle, DATE_FORMAT(d.dateAjout, '%Y-%m-%d') as dateAjout, e.libelle as libelleetat, t.nbreJoursLivraison as nbreJoursLivraison, s.libelle as site, d.libelle as libelleDossier")
         ->join('d.typeDossier', 't')
+        ->join('d.site', 's')
         ->join('d.etat', 'e')
         ->join('t.categorieDossier', 'c')        
         ->orderBy('d.id', 'DESC');
@@ -99,6 +100,7 @@ public function countDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateF
         ->select('count(d.id)')
         ->join('d.typeDossier', 't')
         ->join('d.etat', 'e')
+        ->join('d.site', 's')
         ->join('t.categorieDossier', 'c')        
         ->orderBy('d.id', 'DESC');
 

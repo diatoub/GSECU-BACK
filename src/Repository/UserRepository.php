@@ -100,7 +100,7 @@ class UserRepository extends ServiceEntityRepository
             ->where('p.code IN (:code)')->setParameter( 'code', [Profil::ADMINISTRATEUR, Profil::EXECUTEUR, Profil::DGSECU, Profil::SUPER_AGENT])
             ->andWhere('q.enabled = :etat')->setParameter('etat', true);
         $query = $email ?         
-            $query->select('q')->addSelect("GROUP_CONCAT(DISTINCT q.email SEPARATOR ', ') AS emailAdmin")->getQuery()->getResult() : 
+            $query->addSelect("GROUP_CONCAT(DISTINCT q.email SEPARATOR ', ') AS emailAdmin")->getQuery()->getResult() : 
             $query->getQuery()->getResult();
         return $query;
     }
