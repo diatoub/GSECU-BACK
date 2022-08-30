@@ -226,13 +226,13 @@ class DossierManager extends BaseManager {
                 $entity->setEmail($user->getEmail());
                 $entity->setStructure($user->getStructure());
             }
-            $libelle = $post['libelle'] ? $post['libelle'] : null;
-            $autre_materiel = $post['autre_materiel'] ? $post['autre_materiel'] : null;
-            $description_panne = $post['description_panne'] ? $post['description_panne'] : null;
-            $quantite_panne = $post['quantite_panne'] ? $post['quantite_panne'] : null;
-            $site = $post['site'] ? $this->em->getRepository(Site::class)->find($post['site']) : null;
-            $type_signalisation = $post['type_signalisation'] ? $this->em->getRepository(TypeDossier::class)->find($post['type_signalisation']) : null;
-            $materiel_panne = $post['materiel_panne'] ? $this->em->getRepository(TypeMateriel::class)->find($post['materiel_panne']) : null;
+            $libelle = isset($post['libelle']) ? $post['libelle'] : null;
+            $autre_materiel = isset($post['autre_materiel']) ? $post['autre_materiel'] : null;
+            $description_panne = isset($post['description_panne']) ? $post['description_panne'] : null;
+            $quantite_panne = isset($post['quantite_panne']) ? $post['quantite_panne'] : null;
+            $site = isset($post['site']) ? $this->em->getRepository(Site::class)->find($post['site']) : null;
+            $type_signalisation = isset($post['type_signalisation']) ? $this->em->getRepository(TypeDossier::class)->find($post['type_signalisation']) : null;
+            $materiel_panne = isset($post['materiel_panne']) ? $this->em->getRepository(TypeMateriel::class)->find($post['materiel_panne']) : null;
             $site = $post['site'] ? $this->em->getRepository(Site::class)->find($post['site']) : null;
             if (!$materiel_panne) {
                 return $this->sendResponse(false, 404, "Materiel en panne introuvable");
@@ -254,13 +254,13 @@ class DossierManager extends BaseManager {
 
             // $fichiertmp = $entity->getFileBeneficiaires()? $entity->getFileBeneficiaires()->getRealPath(): null;//Récupère le chemin temporaire sur la machine cliente
             // $typeFichier = $entity->getFileBeneficiaires()?$entity->getFileBeneficiaires()->getClientMimeType():null;
-            if ($post['file']) {
+            if (isset($post['file'])) {
                 foreach ($post['file'] as $fichier){ //Permet d'obtenir le path des fichiers uploadés
                     $complement = new ComplementDossier();
                     $complement->file = $fichier;
                     $complement->preUpload();
                     $complement->upload($post['document_directory']);
-                    $complement->setLibelle($post['libellePiece'] ? $post['libellePiece'] : null);
+                    $complement->setLibelle(isset($post['libellePiece']) ? $post['libellePiece'] : null);
                     $entity->addComplementDossier($complement);
                     $this->em->persist($complement);
                 }
