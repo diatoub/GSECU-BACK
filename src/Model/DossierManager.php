@@ -216,7 +216,7 @@ class DossierManager extends BaseManager {
     
     public function nouvelleSignalisation($userConnect, $post) {
         $entity = new Dossier();
-        $signaleur = $post['signaleur'] ? $this->em->getRepository(User::class)->find($post['signaleur']) : null ;
+        $signaleur = isset($post['signaleur']) ? $this->em->getRepository(User::class)->find($post['signaleur']) : null ;
         // tester si cest en mode post notify
             $user = $userConnect ? $userConnect : $signaleur;
             if ($user) {
@@ -233,7 +233,7 @@ class DossierManager extends BaseManager {
             $site = isset($post['site']) ? $this->em->getRepository(Site::class)->find($post['site']) : null;
             $type_signalisation = isset($post['type_signalisation']) ? $this->em->getRepository(TypeDossier::class)->find($post['type_signalisation']) : null;
             $materiel_panne = isset($post['materiel_panne']) ? $this->em->getRepository(TypeMateriel::class)->find($post['materiel_panne']) : null;
-            $site = $post['site'] ? $this->em->getRepository(Site::class)->find($post['site']) : null;
+            $site = isset($post['site']) ? $this->em->getRepository(Site::class)->find($post['site']) : null;
             if (!$materiel_panne) {
                 return $this->sendResponse(false, 404, "Materiel en panne introuvable");
             }
@@ -303,11 +303,11 @@ class DossierManager extends BaseManager {
 
     public function nouvelleDemande($userConnect, $post) {
         $entity = new Dossier();
-        $type_demande = $post['type_demande'] ? $this->em->getRepository(TypeDossier::class)->find($post['type_demande']) : null;
+        $type_demande = isset($post['type_demande']) ? $this->em->getRepository(TypeDossier::class)->find($post['type_demande']) : null;
         if (!$type_demande) {
             return $this->sendResponse(false, 404, "Type de demande introuvable");
         }
-        $demandeur = $post['demandeur'] ? $this->em->getRepository(User::class)->find($post['demandeur']) : null ;
+        $demandeur = isset($post['demandeur']) ? $this->em->getRepository(User::class)->find($post['demandeur']) : null ;
         // tester si cest en mode post notify
             $user = $userConnect ? $userConnect : $demandeur;
             if ($user) {
@@ -319,13 +319,13 @@ class DossierManager extends BaseManager {
                 $entity->removeUser($user);
             }
             $entity->setDateAjout(new \DateTime());
-            if ($post['file']) {
+            if (isset($post['file'])) {
                 foreach ($post['file'] as $fichier){ //Permet d'obtenir le path des fichiers uploadés
                     $complement = new ComplementDossier();
                     $complement->file = $fichier;
                     $complement->preUpload();
                     $complement->upload($post['document_directory']);
-                    $complement->setLibelle($post['libellePiece'] ? $post['libellePiece'] : null);
+                    $complement->setLibelle(isset($post['libellePiece']) ? $post['libellePiece'] : null);
                     $entity->addComplementDossier($complement);
                     $this->em->persist($complement);
                 }
@@ -338,26 +338,26 @@ class DossierManager extends BaseManager {
             $codeSecret = md5($code);
             $entity->setCodeDossier($code);
             $entity->setCodeSecret($codeSecret);
-            $description = $post['description'] ? $post['description'] : null;
+            $description = isset($post['description']) ? $post['description'] : null;
             $entity->setDescription($description);
             $entity ->setTypeDossier($type_demande);
 
             // Traitement des différentes formulaires (les formulaires en communs)
             if ($type_demande->getId() != 22 && $type_demande->getId() != 31) {
-                $quantite = $post['quantite'] ? $post['quantite'] : null;
+                $quantite = isset($post['quantite'] ) ? $post['quantite'] : null;
                 $entity->setQuantite($quantite);   
             }
             // Traitement du formulaire (Confection de badge)
             if ($type_demande->getId() === 22) {
-                $nom = $post['nom'] ? $post['nom'] : null;
-                $prenom = $post['prenom'] ? $post['prenom'] : null;
-                $matricule = $post['matricule'] ? $post['matricule'] : null;
-                $site = $post['site'] ? $this->em->getRepository(Site::class)->find($post['site']) : null;
-                $type_badge = $post['type_badge'] ? $this->em->getRepository(TypeBadge::class)->find($post['type_badge']) : null;
-                $type_contrat = $post['type_contrat'] ? $this->em->getRepository(TypeContrat::class)->find($post['type_contrat']) : null;
-                $objet_badge = $post['objet_badge'] ? $this->em->getRepository(ObjetBadge::class)->find($post['objet_badge']) : null;
-                $motif_demande = $post['motif_demande'] ? $this->em->getRepository(MotifDemande::class)->find($post['motif_demande']) : null;
-                $motif_remplacement = $post['motif_remplacement'] ? $this->em->getRepository(MotifDemande::class)->find($post['motif_remplacement']) : null;
+                $nom = isset($post['nom']) ? $post['nom'] : null;
+                $prenom = isset($post['prenom']) ? $post['prenom'] : null;
+                $matricule = isset($post['matricule']) ? $post['matricule'] : null;
+                $site = isset($post['site']) ? $this->em->getRepository(Site::class)->find($post['site']) : null;
+                $type_badge = isset($post['type_badge']) ? $this->em->getRepository(TypeBadge::class)->find($post['type_badge']) : null;
+                $type_contrat = isset($post['type_contrat']) ? $this->em->getRepository(TypeContrat::class)->find($post['type_contrat']) : null;
+                $objet_badge = isset($post['objet_badge']) ? $this->em->getRepository(ObjetBadge::class)->find($post['objet_badge']) : null;
+                $motif_demande = isset($post['motif_demande']) ? $this->em->getRepository(MotifDemande::class)->find($post['motif_demande']) : null;
+                $motif_remplacement = isset($post['motif_remplacement']) ? $this->em->getRepository(MotifDemande::class)->find($post['motif_remplacement']) : null;
                 
                 if (!$type_badge) {
                     return $this->sendResponse(false, 404, "Type de badge introuvable");
