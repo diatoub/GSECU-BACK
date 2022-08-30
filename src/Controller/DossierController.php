@@ -43,7 +43,7 @@ class DossierController extends BaseController {
     }
 
     /**
-     * @Rest\Post("/check_dossier", name="check_dossier")
+     * @Rest\Post("/dossier/check_dossier", name="check_dossier")
      * @QMLogger(message="recherche dossier par codeDossier")
      */
     public function check_dossier(Request $request) {
@@ -60,7 +60,7 @@ class DossierController extends BaseController {
     }
     
     /**
-     * @Rest\Post("/nouvelleSignalisation", name="nouvelleSignalisation")
+     * @Rest\Post("/dossier/nouvelleSignalisation", name="nouvelleSignalisation")
      * @QMLogger(message="Ajouter une signalisation")
      */
     public function nouvelleSignalisation(Request $request) {
@@ -71,7 +71,7 @@ class DossierController extends BaseController {
         return $this->dossierManager->nouvelleSignalisation($this->getUser(),$post);
     }
     /**
-     * @Rest\Post("/nouvelleDemande", name="nouvelleDemande")
+     * @Rest\Post("/dossier/nouvelleDemande", name="nouvelleDemande")
      * @QMLogger(message="Ajouter une demande")
      */
     public function nouvelleDemande(Request $request) {
