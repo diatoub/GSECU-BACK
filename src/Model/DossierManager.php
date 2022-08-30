@@ -316,7 +316,6 @@ class DossierManager extends BaseManager {
                 $entity->setMobile($user->getTelephone());
                 $entity->setEmail($user->getEmail());
                 $entity->setStructure($user->getStructure());
-                $entity->removeUser($user);
             }
             $entity->setDateAjout(new \DateTime());
             if (isset($post['file'])) {
