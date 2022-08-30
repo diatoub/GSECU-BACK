@@ -28,6 +28,7 @@ class DossierMapping  {
             "typeBadge"=> $dossier->getTypeBadge() ? $dossier->getTypeBadge()->getLibelle() : null,
             "typeMateriel"=> $dossier->getTypeMateriel() ? $dossier->getTypeMateriel()->getLibelle() : null,
             "typeDossier"=> $dossier->getTypeDossier() ? $dossier->getTypeDossier()->getLibelle() : null,
+            "categorie"=> $dossier->getTypeDossier() && $dossier->getTypeDossier()->getCategorieDossier() ? $dossier->getTypeDossier()->getCategorieDossier()->getCode() : null,
             "dateAjout"=> $dossier->getDateAjout() ? date_format($dossier->getDateAjout(), 'd-m-Y'): null,
             "dateDebut"=> $dossier->getDateDebut() ? date_format($dossier->getDateDebut(), 'd-m-Y') : null,
             "dateFin"=> $dossier->getDateFin() ? date_format($dossier->getDateFin(), 'd-m-Y') : null,
