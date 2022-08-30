@@ -5,6 +5,7 @@ use Doctrine\Persistence\ManagerRegistry;
 Use App\Annotation\QMLogger;
 use App\Entity\User;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Symfony\Component\HttpFoundation\Request;
 
 class UserController extends BaseController {
 
@@ -19,8 +20,9 @@ class UserController extends BaseController {
      * @Rest\Get("/les_users", name="les_users")
      * @QMLogger(message="listes de tous les utilisateurs")
      */
-    public function listeAllUser() {
-        return $this->sendResponse(true, 200,$this->em->getRepository(User::class)->listeAllUser());
+    public function listeAllUser(Request $request) {
+        $filtre = $request->query->get('filtre','');
+        return $this->sendResponse(true, 200,$this->em->getRepository(User::class)->listeAllUser($filtre));
     }
     
 }

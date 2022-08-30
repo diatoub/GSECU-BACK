@@ -49,6 +49,22 @@ class UserRepository extends ServiceEntityRepository
     }
     */
 
+    public function listeAllUser($filtre) {
+        $query = $this->createQueryBuilder('u')
+            ->select('u.id, u.email, u.nom, u.prenom, u.telephone, u.username, s.id as idStructure, s.libelle as structure, ts.id as idTypeStructure, ts.libelle as typeStructure')
+            ->innerJoin('u.structure', 's')
+            ->innerJoin('s.typeStructure', 'ts')
+            ->where('u.enabled = :enabled')
+            ->setParameter( 'enabled', true);
+            if($filtre != ''){
+                $query
+                    ->andWhere('u.prenom LIKE :filtre OR u.nom LIKE :filtre OR u.email LIKE :filtre')
+                    ->setParameter('filtre','%'.$filtre.'%');
+            }
+
+        return $query ->getQuery()->getResult();
+    }
+
     public function getAdmin(){
         $query = $this->createQueryBuilder('q')
             ->join('q.profil', 'p')
