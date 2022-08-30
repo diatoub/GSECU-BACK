@@ -44,10 +44,8 @@ class DossierManager extends BaseManager {
         $my_etat = $find_etat ? $find_etat->getLibelle() :null ;
         $categorie = $categorie ? $this->em->getRepository(CategorieDossier::class)->find($categorie) : null ;
         $catgorieDossier = $categorie ? $categorie->getCode() :null ;
-        // dd($catgorieDossier);
         $les_dossiers = $this->em->getRepository(Dossier::class)->lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin, $offset,$limit,$filtre,$my_etat, $my_site);
         $total = $this->em->getRepository(Dossier::class)->countDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin, $offset,$limit,$filtre,$my_etat, $my_site);
-        dd($les_dossiers, $total);
         return $this->sendResponse(true, 200, $les_dossiers, $total);
     }
     
