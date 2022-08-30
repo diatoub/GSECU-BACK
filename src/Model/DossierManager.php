@@ -6,9 +6,13 @@ use App\Entity\Commentaire;
 use App\Entity\ComplementDossier;
 use App\Entity\Dossier;
 use App\Entity\Etat;
+use App\Entity\MotifDemande;
+use App\Entity\ObjetBadge;
 use App\Entity\Profil;
 use App\Entity\Site;
 use App\Entity\SuiviDelai;
+use App\Entity\TypeBadge;
+use App\Entity\TypeContrat;
 use App\Entity\TypeDossier;
 use App\Entity\TypeMateriel;
 use App\Entity\User;
@@ -43,6 +47,7 @@ class DossierManager extends BaseManager {
         // dd($catgorieDossier);
         $les_dossiers = $this->em->getRepository(Dossier::class)->lesDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin, $offset,$limit,$filtre,$my_etat, $my_site);
         $total = $this->em->getRepository(Dossier::class)->countDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateFin, $offset,$limit,$filtre,$my_etat, $my_site);
+        dd($les_dossiers, $total);
         return $this->sendResponse(true, 200, $les_dossiers, $total);
     }
     
@@ -251,14 +256,16 @@ class DossierManager extends BaseManager {
 
             // $fichiertmp = $entity->getFileBeneficiaires()? $entity->getFileBeneficiaires()->getRealPath(): null;//Récupère le chemin temporaire sur la machine cliente
             // $typeFichier = $entity->getFileBeneficiaires()?$entity->getFileBeneficiaires()->getClientMimeType():null;
-            foreach ($post['file'] as $fichier){ //Permet d'obtenir le path des fichiers uploadés
-                $complement = new ComplementDossier();
-                $complement->file = $fichier;
-                $complement->preUpload();
-                $complement->upload($post['document_directory']);
-                $complement->setLibelle($post['libellePiece'] ? $post['libellePiece'] : null);
-                $entity->addComplementDossier($complement);
-                $this->em->persist($complement);
+            if ($post['file']) {
+                foreach ($post['file'] as $fichier){ //Permet d'obtenir le path des fichiers uploadés
+                    $complement = new ComplementDossier();
+                    $complement->file = $fichier;
+                    $complement->preUpload();
+                    $complement->upload($post['document_directory']);
+                    $complement->setLibelle($post['libellePiece'] ? $post['libellePiece'] : null);
+                    $entity->addComplementDossier($complement);
+                    $this->em->persist($complement);
+                }
             }
             $etatDossier = $this->em->getRepository(Etat::class)->findOneBy(['libelle'=>Etat::NOUVEAU]);
             $entity->setEtat( $etatDossier );
@@ -298,9 +305,13 @@ class DossierManager extends BaseManager {
 
     public function nouvelleDemande($userConnect, $post) {
         $entity = new Dossier();
-        $signaleur = $post['signaleur'] ? $this->em->getRepository(User::class)->find($post['signaleur']) : null ;
+        $type_demande = $post['type_demande'] ? $this->em->getRepository(TypeDossier::class)->find($post['type_demande']) : null;
+        if (!$type_demande) {
+            return $this->sendResponse(false, 404, "Type de demande introuvable");
+        }
+        $demandeur = $post['demandeur'] ? $this->em->getRepository(User::class)->find($post['demandeur']) : null ;
         // tester si cest en mode post notify
-            $user = $userConnect ? $userConnect : $signaleur;
+            $user = $userConnect ? $userConnect : $demandeur;
             if ($user) {
                 $entity->setLastname($user->getNom());
                 $entity->setFirstname($user->getPrenom());
@@ -309,48 +320,105 @@ class DossierManager extends BaseManager {
                 $entity->setStructure($user->getStructure());
                 $entity->removeUser($user);
             }
-            $fichiertmp = $entity->getFileBeneficiaires()? $entity->getFileBeneficiaires()->getRealPath(): null;//Récupère le chemin temporaire sur la machine cliente
-            $typeFichier = $entity->getFileBeneficiaires()?$entity->getFileBeneficiaires()->getClientMimeType():null;
-            foreach ($entity->getComplementDossier() as $complement){ //Permet d'obtenir le path des fichiers uploadés
-                $complement->preUpload();
-                $complement->upload($this->getParameter('doc_directory'));
-                //$complement->upload($this->getParameter('kernel.project_dir'));
+            $entity->setDateAjout(new \DateTime());
+            if ($post['file']) {
+                foreach ($post['file'] as $fichier){ //Permet d'obtenir le path des fichiers uploadés
+                    $complement = new ComplementDossier();
+                    $complement->file = $fichier;
+                    $complement->preUpload();
+                    $complement->upload($post['document_directory']);
+                    $complement->setLibelle($post['libellePiece'] ? $post['libellePiece'] : null);
+                    $entity->addComplementDossier($complement);
+                    $this->em->persist($complement);
+                }
             }
             $etatDossier = $this->em->getRepository(Etat::class)->findOneBy(['libelle'=>Etat::NOUVEAU]);
             $entity->setEtat( $etatDossier );
-            $countByMonth = $this->em->getRepository(Dossier::class)->getCountByMonth();
-            if($countByMonth === NULL){
-                $countByMonth = 0;
-            }
-            $count = intval($countByMonth) + 1;
-            //$unique_id = str_pad($count, 4, '0', STR_PAD_LEFT);
-            $unique_id = GenerateUtils::newKey($em);
-            switch ($categorie)
-            {
-                case CategorieDossier::SIGNALISATION:
-                    $code = "SIG".date("Y").date("m").$unique_id['uniqueDossier'];
-                    break;
-                case CategorieDossier::DEMANDE:
-                    $code = "DEM".date("Y").date("m").$unique_id['uniqueDossier'];
-                    break;
-                case CategorieDossier::QRCODE:
-                    $code = "QRC".date("Y").date("m").$unique_id['uniqueDossier'];
-                    break;
-            }
-            foreach($entity->getSites() as $site){
-                $entity->addSiteAutorisation($site);
-            }
-                // Cryptage du code du dossier en md5
-                $codeSecret = md5($code);
-                $entity->setCodeDossier($code);
-                $entity->setCodeSecret($codeSecret);
-                $this->em->persist($entity);
-                $this->em->flush();
+            $unique_id =$this->generateUtils->newKey($this->em);
+            $code = "DEM".date("Y").date("m").$unique_id['uniqueDossier'];
+            // Cryptage du code du dossier en md5
+            $codeSecret = md5($code);
+            $entity->setCodeDossier($code);
+            $entity->setCodeSecret($codeSecret);
+            $description = $post['description'] ? $post['description'] : null;
+            $entity->setDescription($description);
+            $entity ->setTypeDossier($type_demande);
 
-                // Envoie de mail à tous les admins pour notifier du nouveau dossier
-                // Envoi de mail à tous les administrateurs
-                //$admin = $em->getRepository(Utilisateur::class)->getAdmin();
-                $admin_and_executeur = $this->em->getRepository(User::class)->getAdminAndExecuteur();
+            // Traitement des différentes formulaires (les formulaires en communs)
+            if ($type_demande->getId() != 22 && $type_demande->getId() != 31) {
+                $quantite = $post['quantite'] ? $post['quantite'] : null;
+                $entity->setQuantite($quantite);   
+            }
+            // Traitement du formulaire (Confection de badge)
+            if ($type_demande->getId() === 22) {
+                $nom = $post['nom'] ? $post['nom'] : null;
+                $prenom = $post['prenom'] ? $post['prenom'] : null;
+                $matricule = $post['matricule'] ? $post['matricule'] : null;
+                $site = $post['site'] ? $this->em->getRepository(Site::class)->find($post['site']) : null;
+                $type_badge = $post['type_badge'] ? $this->em->getRepository(TypeBadge::class)->find($post['type_badge']) : null;
+                $type_contrat = $post['type_contrat'] ? $this->em->getRepository(TypeContrat::class)->find($post['type_contrat']) : null;
+                $objet_badge = $post['objet_badge'] ? $this->em->getRepository(ObjetBadge::class)->find($post['objet_badge']) : null;
+                $motif_demande = $post['motif_demande'] ? $this->em->getRepository(MotifDemande::class)->find($post['motif_demande']) : null;
+                $motif_remplacement = $post['motif_remplacement'] ? $this->em->getRepository(MotifDemande::class)->find($post['motif_remplacement']) : null;
+                
+                if (!$type_badge) {
+                    return $this->sendResponse(false, 404, "Type de badge introuvable");
+                }
+                if (!$site) {
+                    return $this->sendResponse(false, 404, "Site introuvable");
+                }
+                if (!$type_contrat) {
+                    return $this->sendResponse(false, 404, "Type de contrat introuvable");
+                }
+                if (!$objet_badge) {
+                    return $this->sendResponse(false, 404, "Objet badge introuvable");
+                }
+                if (!$motif_demande) {
+                    return $this->sendResponse(false, 404, "Motif de demande introuvable");
+                }
+                if (!$motif_remplacement) {
+                    return $this->sendResponse(false, 404, "Motif de remplacement introuvable");
+                }
+                $entity->setNomBeneficiaire($nom);
+                $entity->setPrenomBeneficiaire($prenom);
+                $entity->setMatriculeBeneficiaire($matricule);
+                $entity->setSiteBeneficiaire($site);
+                $entity->setTypeBadge($type_badge);
+                $entity->setTypeContrat($type_contrat);
+                $entity->setObjetBadge($objet_badge);
+                $entity->setMotifDemande($motif_demande);
+                $entity->setMotifRemplacement($motif_remplacement);
+            }
+            // Traitement du formulaire (Demande d'autorisation d'accès)
+            if ($type_demande->getId() === 31) {
+                dd('le dernier formulaire');           
+                # code...
+            }            
+            $admin_and_executeur = $this->em->getRepository(User::class)->getAdminAndExecuteur(true);
+            $email = "salifabdoul.sow1@orange-sonatel.com,ababacar.fall@orange-sonatel.com,malick.coly1@orange-sonatel.com";
+            $recepteursMail = explode(',', $email);
+            // $recepteursMail = explode(',', $admin_and_executeur[0]["emailAdmin"]);
+
+            $this->em->persist($entity);
+            $this->em->flush();
+            // Envoie de mail à tous les admins pour notifier du nouveau dossier
+            // Envoi de mail à tous les administrateurs
+            $msg=array(
+                "to"=>$recepteursMail,
+                "body"=>$this->fonctions->setMailAdminNouvelleDossier($entity),
+                "subject"=>"NOUVELLE DEMANDE",
+                "cc"=>$this->copy,
+            );
+            $msg1=array(
+                "to"=>$entity->getEmail(),
+                "body"=>$this->fonctions->setMailSignaleurNouvelleDossier($entity),
+                "subject"=>"NOUVELLE DEMANDE",
+                "cc"=>$this->copy,
+            );
+            $this->fonctions->sendMail($msg);
+            $this->fonctions->sendMail($msg1);
+            return $this->sendResponse(true,200,array('message'=>'Une nouvelle demande intitulée '.$entity->getTypeDossier()->getLibelle().' ajoutée avec succès !'));
+            
     }
 }
 

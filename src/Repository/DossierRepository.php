@@ -101,8 +101,7 @@ public function countDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateF
         ->join('d.typeDossier', 't')
         ->join('d.etat', 'e')
         ->join('d.site', 's')
-        ->join('t.categorieDossier', 'c')        
-        ->orderBy('d.id', 'DESC');
+        ->join('t.categorieDossier', 'c');
 
         if($catgorieDossier)
         {
@@ -127,9 +126,7 @@ public function countDossiers($catgorieDossier, $codeDossier, $dateDebut, $dateF
                 ->setParameter('dateDebut', $dateDebut->format('Y-m-d'))
                 ->setParameter('dateFin', $dateFin->format('Y-m-d'));
         }
-        if($limit != 'ALL'){
-            $query->setFirstResult($offset)->setMaxResults($limit);
-        }
+
         if($filtre || $filtre != '')
         {
             $query->andWhere('t.libelle LIKE :filtre')

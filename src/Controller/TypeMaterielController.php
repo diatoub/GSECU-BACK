@@ -19,8 +19,8 @@ class TypeMaterielController extends BaseController {
      * @Rest\Get("/les_types_materiels", name="les_types_materiels")
      * @QMLogger(message="listes types materiels")
      */
-    public function listeTypeStructure() {
-        return $this->sendResponse(true, 200,$this->em->getRepository(TypeMateriel::class)->listeTypeStructure());
+    public function listeTypeMateriel() {
+        return $this->sendResponse(true, 200,$this->em->getRepository(TypeMateriel::class)->listeTypeMateriel());
     }
     
 }

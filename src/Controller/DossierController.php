@@ -76,12 +76,9 @@ class DossierController extends BaseController {
      */
     public function nouvelleDemande(Request $request) {
         $post = $request->request->all();
-        $post['logoFile'] = $request->files->get('logo');
-        $post['ninea'] = $request->files->get('ninea');
-        $post['cnidg'] = $request->files->get('cnidg');
-        $post['rccm'] = $request->files->get('rccm');
-        $post['contrat'] = $request->files->get('contrat');
-        $codeDossier = json_decode($request->getContent(), true);
+        $post['file'] = $request->files->get('file');
+        $post['images_directory'] = $this->getParameter('images_directory');
+        $post['document_directory'] = $this->getParameter('document_directory');
         return $this->dossierManager->nouvelleDemande($this->getUser(),$post);
     }
 }
