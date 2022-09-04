@@ -38,8 +38,9 @@ class DossierController extends BaseController {
      * @Rest\Get("/dossier/{id}", name="dossier/{id}")
      * @QMLogger(message="details dossiers")
      */
-    public function detailDossier($id) {
-        return $this->dossierManager->detailDossier($this->getUser(),$id);
+    public function detailDossier(Request $request, $id) {
+        $categorie = $request->query->get('categorie');
+        return $this->dossierManager->detailDossier($this->getUser(),$id, $categorie);
     }
 
     /**

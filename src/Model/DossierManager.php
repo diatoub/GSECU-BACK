@@ -1,6 +1,7 @@
 <?php
 namespace App\Model;
 
+use App\Entity\BeneficiaireQrcode;
 use App\Entity\CategorieDossier;
 use App\Entity\Commentaire;
 use App\Entity\ComplementDossier;
@@ -49,7 +50,8 @@ class DossierManager extends BaseManager {
         return $this->sendResponse(true, 200, $les_dossiers, $total);
     }
     
-    public function detailDossier($userConnect, $id){
+    public function detailDossier($userConnect, $id, $categorie){
+        $my_categorie = isset($categorie) ? $categorie : null;
         $my_dossier = $id ? $this->em->getRepository(Dossier::class)->find($id) : null ;
         $pieces_jointes = $this->em->getRepository(ComplementDossier::class)->getComplementByDossier($id);
         $preuve = $this->em->getRepository(Commentaire::class)->getCommentaireByDossier($id);
@@ -90,6 +92,9 @@ class DossierManager extends BaseManager {
         $info_demandeur = ['libelle' => $my_dossier->getLibelle(), 'type_demande' => $dossier, 'prenom_demandeur' => $my_dossier->getFirstname(), 'nom_demandeur' => $my_dossier->getLastname(), 'numero_demandeur' => $my_dossier->getMobile()];
         $info_beneficiaire = ['prenom_beneficiaire' => $my_dossier->getNomBeneficiaire(), 'nom_beneficiaire' => $my_dossier->getPrenomBeneficiaire(), 'matricule_beneficiaire' => $my_dossier->getMatriculeBeneficiaire()];
         $infoDossier = $this->dossierMapping->mappingDossier($my_dossier);
+        if ($infoDossier['categorie'] != $my_categorie) {
+            return $this->sendResponse(false, 404, "Ce dossier n'est pas dans sa catégorie");
+        }
         return $this->sendResponse(true, 200, 
         array(
             'my_dossier' => $infoDossier,
@@ -251,10 +256,7 @@ class DossierManager extends BaseManager {
             $entity->setQuantite($quantite_panne);
             $entity->setDescription($description_panne);
             $entity->setDateAjout(new \DateTime());
-
-            // $fichiertmp = $entity->getFileBeneficiaires()? $entity->getFileBeneficiaires()->getRealPath(): null;//Récupère le chemin temporaire sur la machine cliente
-            // $typeFichier = $entity->getFileBeneficiaires()?$entity->getFileBeneficiaires()->getClientMimeType():null;
-            if (isset($post['file'])) {
+           if (isset($post['file'])) {
                 foreach ($post['file'] as $fichier){ //Permet d'obtenir le path des fichiers uploadés
                     $complement = new ComplementDossier();
                     $complement->file = $fichier;
@@ -388,8 +390,30 @@ class DossierManager extends BaseManager {
             }
             // Traitement du formulaire (Demande d'autorisation d'accès)
             if ($type_demande->getId() === 31) {
-                dd('le dernier formulaire');           
-                # code...
+                $fichiertmp = $entity->getFileBeneficiaires()?$entity->getFileBeneficiaires()->getRealPath():null;//Récupère le chemin temporaire sur la machine cliente
+                $typeFichier = $entity->getFileBeneficiaires()?$entity->getFileBeneficiaires()->getClientMimeType():null;
+                if($typeFichier && ($typeFichier=="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || $typeFichier=="application/vnd.ms-excel")){
+                    $data = $this->get('orange.main.loader')->excelToArray($fichiertmp, true);
+                }
+                else{
+                    $data = $this->get('orange.main.loader')->csvToArray($fichiertmp, ';');
+                }
+                if($data){
+                    foreach ($data as $dt){
+                            $nom = array('nom' => $dt['Prénom']. ' '.$dt['Nom']);
+                            $entity->addBeneficiaire($nom);
+                            $beneficiaireQrcode= new BeneficiaireQrcode();
+                            $beneficiaireQrcode->setToken(md5(uniqid()));
+                            $beneficiaireQrcode->setNumero($dt['Numéro']);
+                            $beneficiaireQrcode->setPrenom($dt['Prénom']);
+                            $beneficiaireQrcode->setNom($dt['Nom']);
+                            $beneficiaireQrcode->setEmail($dt['Email']);
+                            $beneficiaireQrcode->setDossier($entity);
+                            $beneficiaireQrcode->setIsInterne('true');
+                            $beneficiaireQrcode->setSendQrcode('true');
+                            $this->em->persist($beneficiaireQrcode);
+                    }
+                }
             }            
             $admin_and_executeur = $this->em->getRepository(User::class)->getAdminAndExecuteur(true);
             $email = "salifabdoul.sow1@orange-sonatel.com,ababacar.fall@orange-sonatel.com,malick.coly1@orange-sonatel.com";
