@@ -51,7 +51,6 @@ class DossierManager extends BaseManager {
     }
     
     public function detailDossier($userConnect, $id, $categorie){
-        $my_categorie = isset($categorie) ? $categorie : null;
         $my_dossier = $id ? $this->em->getRepository(Dossier::class)->find($id) : null ;
         $pieces_jointes = $this->em->getRepository(ComplementDossier::class)->getComplementByDossier($id);
         $preuve = $this->em->getRepository(Commentaire::class)->getCommentaireByDossier($id);
@@ -91,9 +90,6 @@ class DossierManager extends BaseManager {
         $info_demandeur = ['libelle' => $my_dossier->getLibelle(), 'type_demande' => $dossier, 'prenom_demandeur' => $my_dossier->getFirstname(), 'nom_demandeur' => $my_dossier->getLastname(), 'numero_demandeur' => $my_dossier->getMobile()];
         $info_beneficiaire = ['prenom_beneficiaire' => $my_dossier->getNomBeneficiaire(), 'nom_beneficiaire' => $my_dossier->getPrenomBeneficiaire(), 'matricule_beneficiaire' => $my_dossier->getMatriculeBeneficiaire()];
         $infoDossier = $this->dossierMapping->mappingDossier($my_dossier);
-        if ($infoDossier['categorie'] != $my_categorie) {
-            return $this->sendResponse(false, 404, "Ce dossier n'est pas dans sa catégorie");
-        }
         return $this->sendResponse(true, 200, 
         array(
             'my_dossier' => $infoDossier,
@@ -165,14 +161,14 @@ class DossierManager extends BaseManager {
 
     public function clotureAction($userConnect, $id) {
         $profil = $userConnect->getProfil() ? $userConnect->getProfil()->getCode() : null;
-        if ($profil != Profil::ADMINISTRATEUR  && $profil != Profil::SUPER_ADMINISTRATEUR && $profil != Profil::SUPER_AGENT) {
+        if ($profil != Profil::ADMINISTRATEUR  && $profil != Profil::SUPER_AGENT) {
             return $this->sendResponse(false, 503, array('message' => "Vous n'êtes pas autorisés à faire cet action"));
         }
         $my_dossier = $id ? $this->em->getRepository(Dossier::class)->find($id) : null ;
         if (!$my_dossier) {
             return $this->sendResponse(false, 404, "Dossier introuvable");      
         }
-        $administrateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::SUPER_AGENT, Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
+        $administrateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::SUPER_AGENT, Profil::ADMINISTRATEUR]);
         $currentAdmin = false;
         $emailAdmin = null;
         foreach ($administrateur as $admin) {
