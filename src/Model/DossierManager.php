@@ -89,7 +89,7 @@ class DossierManager extends BaseManager {
         }        
         // add data on log file
         $dossier = $my_dossier->getTypeDossier() ? $my_dossier->getTypeDossier()->getLibelle() : '';
-        $info_demandeur = ['libelle' => $my_dossier->getLibelle(), 'type_demande' => $dossier, 'prenom_demandeur' => $my_dossier->getFirstname(), 'nom_demandeur' => $my_dossier->getLastname(), 'numero_demandeur' => $my_dossier->getMobile(), 'email demandeur' => $my_dossier->getEmail()];
+        $info_demandeur = ['libelle' => $my_dossier->getLibelle(), 'type_demande' => $dossier, 'prenom_demandeur' => $my_dossier->getFirstname(), 'nom_demandeur' => $my_dossier->getLastname(), 'numero_demandeur' => $my_dossier->getMobile(), 'email_demandeur' => $my_dossier->getEmail()];
         $info_beneficiaire = ['prenom_beneficiaire' => $my_dossier->getNomBeneficiaire(), 'nom_beneficiaire' => $my_dossier->getPrenomBeneficiaire(), 'matricule_beneficiaire' => $my_dossier->getMatriculeBeneficiaire()];
         $infoDossier = $this->dossierMapping->mappingDossier($my_dossier);
         return $this->sendResponse(true, 200, 
@@ -144,8 +144,8 @@ class DossierManager extends BaseManager {
         
         // add data on log file
         $dossier = $my_dossier->getTypeDossier() ? $my_dossier->getTypeDossier()->getLibelle() : '';
-        $info_demandeur = ['libelle' => $my_dossier->getLibelle(), 'type demande' => $dossier, 'Prenom demandeur' => $my_dossier->getFirstname(), 'Nom demandeur' => $my_dossier->getLastname(), 'numéro demandeur' => $my_dossier->getMobile(), 'email demandeur' => $my_dossier->getEmail()];
-        $info_beneficiaire = ['Prenom beneficiaire' => $my_dossier->getNomBeneficiaire(), 'Nom beneficiaire' => $my_dossier->getPrenomBeneficiaire(), 'matricule beneficiaire' => $my_dossier->getMatriculeBeneficiaire()];
+        $info_demandeur = ['libelle' => $my_dossier->getLibelle(), 'type_demande' => $dossier, 'prenom_demandeur' => $my_dossier->getFirstname(), 'nom_demandeur' => $my_dossier->getLastname(), 'numéro_demandeur' => $my_dossier->getMobile(), 'email_demandeur' => $my_dossier->getEmail()];
+        $info_beneficiaire = ['prenom_beneficiaire' => $my_dossier->getNomBeneficiaire(), 'nom_beneficiaire' => $my_dossier->getPrenomBeneficiaire(), 'matricule_beneficiaire' => $my_dossier->getMatriculeBeneficiaire()];
         $infoDossier = $this->dossierMapping->mappingDossier($my_dossier);
         return $this->sendResponse(true, 200, 
         array(
