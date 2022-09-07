@@ -79,14 +79,13 @@ class DossierManager extends BaseManager {
         else{
             $validateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::EXECUTEUR, Profil::SUPER_AGENT, Profil::DGSECU]);
         }
-        $administrateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::SUPER_AGENT, Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
+        $administrateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
         $currentAdmin = false;
         foreach ($administrateur as $admin) {
             if ($admin['id'] === $userConnect->getId()){
                 $currentAdmin = true;
             }
-        }
-        
+        }        
         // add data on log file
         $dossier = $my_dossier->getTypeDossier() ? $my_dossier->getTypeDossier()->getLibelle() : '';
         $info_demandeur = ['libelle' => $my_dossier->getLibelle(), 'type_demande' => $dossier, 'prenom_demandeur' => $my_dossier->getFirstname(), 'nom_demandeur' => $my_dossier->getLastname(), 'numero_demandeur' => $my_dossier->getMobile()];
