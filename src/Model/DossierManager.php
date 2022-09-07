@@ -59,24 +59,26 @@ class DossierManager extends BaseManager {
         }
         $etats = [Etat::NOUVEAU, Etat::OUVERT];
         if (in_array($my_dossier->getEtat()->getLibelle(), $etats)) {
-            $executeur = array();
+            $executeur = null;
         } 
         elseif ($my_dossier->getAgentExecution()){
             $executeur = $this->dossierMapping->mappingInfoUser($my_dossier->getAgentExecution());
         } 
         else{
-            $executeur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::EXECUTEUR, Profil::DGSECU]);
+            $executeur = null;
         }
         
         $isValide = [Etat::VALIDE, Etat::SIGNE, Etat::CLOTURE];
         if (!in_array($my_dossier->getEtat()->getLibelle(), $isValide)) {
-            $validateur = array();
+            $validateur = null;
+            
         } 
         elseif ($my_dossier->getValidateur()){
+            
             $validateur = $this->dossierMapping->mappingInfoUser($my_dossier->getValidateur());       
         } 
         else{
-            $validateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::EXECUTEUR, Profil::SUPER_AGENT, Profil::DGSECU]);
+            $validateur = null;
         }
         $administrateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::SUPER_AGENT, Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
         $currentAdmin = false;
@@ -120,7 +122,7 @@ class DossierManager extends BaseManager {
             $executeur = $this->dossierMapping->mappingInfoUser($my_dossier->getAgentExecution());
         } 
         else{
-            $executeur = $this->em->getRepository(User::class)->getUserByDossier($my_dossier->getId(), [Profil::EXECUTEUR, Profil::DGSECU]);
+            $executeur = null;
         }
         
         $isValide = [Etat::VALIDE, Etat::SIGNE, Etat::CLOTURE];
@@ -131,7 +133,7 @@ class DossierManager extends BaseManager {
             $validateur = $this->dossierMapping->mappingInfoUser($my_dossier->getValidateur());       
         } 
         else{
-            $validateur = $this->em->getRepository(User::class)->getUserByDossier($my_dossier->getId(), [Profil::EXECUTEUR, Profil::SUPER_AGENT, Profil::DGSECU]);
+            $validateur = null;
         }
         $administrateur = $this->em->getRepository(User::class)->getUserByDossier($my_dossier->getId(), [Profil::SUPER_AGENT, Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
         $currentAdmin = false;
