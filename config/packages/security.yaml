@@ -59,7 +59,7 @@ security:
             stateless: true
             anonymous: true
         app_dossier:
-            pattern: ^/dossier
+            pattern: ^/dossier/check_dossier
             stateless: true
             anonymous: true
         test:
@@ -78,7 +78,7 @@ security:
                     - lexik_jwt_authentication.jwt_token_authenticator
     access_control:
         - { path: ^/login$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/dossier$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/dossier/check_dossier, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/swagger, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/reinitialisationMotDePass, roles: IS_AUTHENTICATED_ANONYMOUSLY}
         - { path: ^/reset, roles: IS_AUTHENTICATED_ANONYMOUSLY}
