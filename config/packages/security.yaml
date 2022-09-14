@@ -58,6 +58,10 @@ security:
             pattern: ^/check-email
             stateless: true
             anonymous: true
+        app_dossier:
+            pattern: ^/dossier
+            stateless: true
+            anonymous: true
         test:
             pattern: ^/test
             stateless: true
