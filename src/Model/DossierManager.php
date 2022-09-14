@@ -107,7 +107,9 @@ class DossierManager extends BaseManager {
     }
 
     public function check_dossier($userConnect, $codeDossier){
+        // dd($codeDossier);
         $my_dossier = $codeDossier ? $this->em->getRepository(Dossier::class)->findOneBy(['codeDossier' => $codeDossier]) : null ;
+        // dd($my_dossier);
         if (!$my_dossier) {
             return $this->sendResponse(false, 503, "Dossier introuvable");            
         }
@@ -135,12 +137,12 @@ class DossierManager extends BaseManager {
             $validateur = null;
         }
         $administrateur = $this->em->getRepository(User::class)->getUserByDossier($my_dossier->getId(), [Profil::SUPER_AGENT, Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
-        $currentAdmin = false;
-        foreach ($administrateur as $admin) {
-            if ($admin['id'] === $userConnect->getId()){
-                $currentAdmin = true;
-            }
-        }
+        // $currentAdmin = false;
+        // foreach ($administrateur as $admin) {
+        //     if ($admin['id'] === $userConnect->getId()){
+        //         $currentAdmin = true;
+        //     }
+        // }
         
         // add data on log file
         $dossier = $my_dossier->getTypeDossier() ? $my_dossier->getTypeDossier()->getLibelle() : '';
@@ -153,7 +155,7 @@ class DossierManager extends BaseManager {
             'executeur' => $executeur,
             'administrateur' => $administrateur,
             'validateur' => $validateur,
-            'currentAdmin' => $currentAdmin,
+            // 'currentAdmin' => $currentAdmin,
             'pieces_jointes' => $pieces_jointes,
             'preuve'	=> $preuve,
             'info_demandeur' => $info_demandeur,
