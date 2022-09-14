@@ -50,7 +50,7 @@ class DossierManager extends BaseManager {
         return $this->sendResponse(true, 200, $les_dossiers, $total);
     }
     
-    public function detailDossier($userConnect, $id, $categorie){
+    public function detailDossier($userConnect, $id){
         $my_dossier = $id ? $this->em->getRepository(Dossier::class)->find($id) : null ;
         $pieces_jointes = $this->em->getRepository(ComplementDossier::class)->getComplementByDossier($id);
         $preuve = $this->em->getRepository(Commentaire::class)->getCommentaireByDossier($id);
@@ -81,12 +81,12 @@ class DossierManager extends BaseManager {
             $validateur = null;
         }
         $administrateur = $this->em->getRepository(User::class)->getUserByDossier($id, [Profil::ADMINISTRATEUR, Profil::DGSECU, Profil::SUPER_ADMINISTRATEUR, Profil::SUPER_AGENT]);
-        $currentAdmin = false;
-        foreach ($administrateur as $admin) {
-            if ($admin['id'] === $userConnect->getId()){
-                $currentAdmin = true;
-            }
-        }        
+        // $currentAdmin = false;
+        // foreach ($administrateur as $admin) {
+        //     if ($admin['id'] === $userConnect->getId()){
+        //         $currentAdmin = true;
+        //     }
+        // }        
         // add data on log file
         $dossier = $my_dossier->getTypeDossier() ? $my_dossier->getTypeDossier()->getLibelle() : '';
         $info_demandeur = ['libelle' => $my_dossier->getLibelle(), 'type_demande' => $dossier, 'prenom_demandeur' => $my_dossier->getFirstname(), 'nom_demandeur' => $my_dossier->getLastname(), 'numero_demandeur' => $my_dossier->getMobile(), 'email_demandeur' => $my_dossier->getEmail()];
@@ -98,7 +98,7 @@ class DossierManager extends BaseManager {
             'executeur' => $executeur,
             'administrateur' => $administrateur,
             'validateur' => $validateur,
-            'currentAdmin' => $currentAdmin,
+            // 'currentAdmin' => $currentAdmin,
             'pieces_jointes' => $pieces_jointes,
             'preuve'	=> $preuve,
             'info_demandeur' => $info_demandeur,
